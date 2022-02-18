@@ -1,4 +1,4 @@
-### What Launchbox does 
+### What LaunchBox does 
 
  - Runs in a Kubernetes cluster 
  - Presents an API for managing running applications 

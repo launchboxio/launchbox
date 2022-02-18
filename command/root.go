@@ -9,9 +9,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "launchbox",
 	Short: "Launchbox: Democratizing Kubernetes",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Our name is cool...")
-	},
 }
 
 func init() {
