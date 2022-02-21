@@ -14,6 +14,7 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@nextui-org/react": "^1.0.2-beta.4",
     "eslint": "8.9.0",
     "eslint-config-next": "12.1.0"
   }
