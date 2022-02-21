@@ -1,7 +1,7 @@
 package command
 
 import (
-	"fmt"
+	"github.com/robwittman/launchbox/api"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +10,15 @@ var (
 		Use:   "delete",
 		Short: "Delete an application",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Deleting an application")
+			client, _ := api.New()
+			ui := NewUI()
+
+			applicationId, _ := cmd.Flags().GetUint("application-id")
+			err := client.Apps().Delete(applicationId)
+			if err != nil {
+				panic(err)
+			}
+			ui.Raw("Delete successful")
 		},
 	}
 )

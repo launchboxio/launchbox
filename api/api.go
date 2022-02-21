@@ -1,5 +1,15 @@
 package api
 
+import (
+	"bytes"
+	"fmt"
+	"github.com/hashicorp/go-cleanhttp"
+	"io"
+	"k8s.io/apimachinery/pkg/util/json"
+	"net/http"
+	"strings"
+)
+
 const (
 	HTTPAddrEnvName      = "LAUNCHBOX_HTTP_ADDR"
 	HTTPTokenEnvName     = "LAUNCHBOX_HTTP_TOKEN"
@@ -13,4 +23,98 @@ const (
 	HTTPSSLVerifyEnvName = "LAUNCHBOX_HTTP_SSL_VERIFY"
 )
 
-type Client struct{}
+type Client struct {
+	config Config
+}
+
+type Config struct {
+	Address    string
+	Transport  *http.Transport
+	HttpClient *http.Client
+}
+
+func defaultConfig(transportFn func() *http.Transport) *Config {
+	config := &Config{
+		Address:   "http://127.0.0.1:8080",
+		Transport: transportFn(),
+	}
+	return config
+}
+
+func DefaultConfig() *Config {
+	return defaultConfig(cleanhttp.DefaultPooledTransport)
+}
+
+func New() (*Client, error) {
+	conf := DefaultConfig()
+	client := &http.Client{
+		Transport: conf.Transport,
+	}
+	conf.HttpClient = client
+	return &Client{config: *conf}, nil
+}
+
+func (c *Client) get(path string, out interface{}) error {
+	url := strings.Join([]string{c.config.Address, path}, "")
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return decodeResponse(resp.Body, out)
+}
+
+func (c *Client) post(path string, in interface{}) error {
+	url := strings.Join([]string{c.config.Address, path}, "")
+	input, err := json.Marshal(in)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(input))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return decodeResponse(resp.Body, in)
+}
+
+func (c *Client) put(path string, in interface{}) error {
+	url := strings.Join([]string{c.config.Address, path}, "")
+	input, err := json.Marshal(in)
+	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(input))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := c.config.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return decodeResponse(resp.Body, in)
+}
+
+func (c *Client) delete(path string) error {
+	url := strings.Join([]string{c.config.Address, path}, "")
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return err
+	}
+	_, err = c.config.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func decodeResponse(resBody io.ReadCloser, out interface{}) error {
+	body, err := io.ReadAll(resBody)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, out)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}

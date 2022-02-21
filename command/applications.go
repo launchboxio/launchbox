@@ -20,5 +20,6 @@ func init() {
 		applicationsDeleteCmd,
 	)
 
+	applicationsCmd.PersistentFlags().UintP("application-id", "", 0, "Application ID")
 	rootCmd.AddCommand(applicationsCmd)
 }

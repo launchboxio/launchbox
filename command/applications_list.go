@@ -1,7 +1,7 @@
 package command
 
 import (
-	"fmt"
+	"github.com/robwittman/launchbox/api"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +10,14 @@ var (
 		Use:   "list",
 		Short: "List generated applications",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Listing applications")
+			client, _ := api.New()
+			ui := NewUI()
+
+			apps, err := client.Apps().List()
+			if err != nil {
+				panic(err)
+			}
+			ui.PrettyPrint(apps)
 		},
 	}
 )

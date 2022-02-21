@@ -17,6 +17,7 @@ func init() {
 		revisionsGetCmd,
 		revisionsCreateCmd,
 		revisionsRevertCmd,
+		revisionsLogsCmd,
 	)
 	rootCmd.AddCommand(revisionsCmd)
 }
