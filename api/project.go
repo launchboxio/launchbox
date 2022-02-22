@@ -54,8 +54,10 @@ func (p *Projects) Delete(projectId uint) error {
 
 }
 
-func (p *Projects) Find() {
-
+func (p *Projects) Find(projectId uint) (*Project, error) {
+	project := &Project{}
+	err := p.c.get(fmt.Sprintf("/projects/%d", projectId), nil, project)
+	return project, err
 }
 
 func (opts *ProjectListOptions) ToQuery() map[string]string {

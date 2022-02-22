@@ -33,6 +33,11 @@ type Config struct {
 	HttpClient *http.Client
 }
 
+type PaginationOptions struct {
+	Page    uint
+	PerPage uint
+}
+
 func defaultConfig(transportFn func() *http.Transport) *Config {
 	config := &Config{
 		Address:   "http://127.0.0.1:8080",

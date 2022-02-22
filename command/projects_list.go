@@ -1,8 +1,10 @@
 package command
 
 import (
+	"fmt"
 	"github.com/robwittman/launchbox/api"
 	"github.com/spf13/cobra"
+	"strconv"
 )
 
 var (
@@ -13,9 +15,10 @@ var (
 			client, _ := api.New()
 			ui := NewUI()
 
-			applicationId, _ := cmd.Flags().GetString("application-id")
+			applicationId, _ := cmd.Flags().GetUint("application-id")
+			fmt.Println(applicationId)
 			apps, err := client.Projects().List(&api.ProjectListOptions{
-				ApplicationId: applicationId,
+				ApplicationId: strconv.FormatUint(uint64(applicationId), 10),
 			})
 			if err != nil {
 				panic(err)
