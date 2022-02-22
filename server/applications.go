@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"net/http"
@@ -20,15 +21,17 @@ func (a *Applications) Register(r *gin.Engine) {
 
 func (a *Applications) List(c *gin.Context) {
 	var apps []api.Application
+	fmt.Println(apps)
 	database.Find(&apps)
-	c.JSON(http.StatusOK, gin.H{"applications": apps})
+	fmt.Println(&apps)
+	c.JSON(http.StatusOK, gin.H{"applications": &apps})
 }
 
 func (a *Applications) Get(c *gin.Context) {
 	id := c.Param("applicationId")
 	var app api.Application
 	database.First(&app, id)
-	c.JSON(http.StatusOK, app)
+	c.JSON(http.StatusOK, &app)
 }
 
 func (a *Applications) Create(c *gin.Context) {

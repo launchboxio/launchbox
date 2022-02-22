@@ -19,5 +19,8 @@ func init() {
 		projectsUpdateCmd,
 		projectsDeleteCmd,
 	)
+
+	projectsCmd.PersistentFlags().UintP("application-id", "", 0, "The application ID")
+	_ = projectsCmd.MarkFlagRequired("application-id")
 	rootCmd.AddCommand(projectsCmd)
 }

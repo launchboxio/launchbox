@@ -33,7 +33,7 @@ func init() {
 	}
 	err = db.AutoMigrate(
 		&api.Application{},
-		&api.Projects{},
+		&api.Project{},
 	)
 	if err != nil {
 		panic(err)
@@ -47,4 +47,5 @@ func (s *Server) Run() error {
 
 func (s *Server) initControllers() {
 	(&Applications{}).Register(s.r)
+	(&Projects{}).Register(s.r)
 }

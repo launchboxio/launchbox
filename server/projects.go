@@ -19,46 +19,34 @@ func (p *Projects) Register(r *gin.Engine) {
 }
 
 func (p *Projects) List(c *gin.Context) {
-	var apps []api.Application
-	database.Find(&apps)
-	c.JSON(http.StatusOK, gin.H{"applications": apps})
+	var projects []api.Project
+	applicationId := c.Query("application_id")
+	database.Where("application_id = ?", applicationId).Find(&projects)
+	c.JSON(http.StatusOK, gin.H{"projects": projects})
 }
 
 func (p *Projects) Get(c *gin.Context) {
-	id := c.Param("applicationId")
-	var app api.Application
-	database.First(&app, id)
-	c.JSON(http.StatusOK, app)
+	id := c.Param("projectId")
+	var project api.Project
+	database.First(&project, id)
+	c.JSON(http.StatusOK, project)
 }
 
 func (p *Projects) Create(c *gin.Context) {
-	app := api.Application{}
-	err := c.ShouldBind(&app)
+	project := api.Project{}
+	err := c.ShouldBind(&project)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
-	database.Create(&app)
-	c.JSON(http.StatusOK, app)
+	database.Create(&project)
+	c.JSON(http.StatusOK, project)
 }
 
 func (p *Projects) Update(c *gin.Context) {
-	app := api.Application{}
-	id := c.Param("applicationId")
-	update := struct {
-		Name string `json:"name"`
-	}{}
-	err := c.ShouldBind(&update)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{})
-		return
-	}
-	database.First(&app, id)
-	app.Name = update.Name
-	database.Save(&app)
-	c.JSON(http.StatusOK, gin.H{"data": app})
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (p *Projects) Delete(c *gin.Context) {
-	database.Where("id = ?", c.Param("applicationId")).Delete(&api.Application{})
+	database.Where("id = ?", c.Param("projectId")).Delete(&api.Project{})
 	c.JSON(http.StatusNoContent, gin.H{})
 }

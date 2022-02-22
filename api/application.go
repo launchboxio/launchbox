@@ -11,7 +11,6 @@ type Apps struct {
 }
 
 type Application struct {
-	gorm.Model
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Name      string         `json:"name"`
 	CreatedAt time.Time      `json:"created_at,omitempty"`
@@ -29,7 +28,7 @@ func (c *Client) Apps() *Apps {
 
 func (a *Apps) List() (ApplicationListResponse, error) {
 	apps := ApplicationListResponse{}
-	err := a.c.get("/applications", &apps)
+	err := a.c.get("/applications", nil, &apps)
 	return apps, err
 }
 
@@ -48,6 +47,6 @@ func (a *Apps) Delete(applicationId uint) error {
 
 func (a *Apps) Find(applicationId uint) (*Application, error) {
 	app := &Application{}
-	err := a.c.get(fmt.Sprintf("/applications/%d", applicationId), app)
+	err := a.c.get(fmt.Sprintf("/applications/%d", applicationId), nil, app)
 	return app, err
 }

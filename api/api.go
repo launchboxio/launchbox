@@ -54,9 +54,23 @@ func New() (*Client, error) {
 	return &Client{config: *conf}, nil
 }
 
-func (c *Client) get(path string, out interface{}) error {
+func (c *Client) get(path string, query map[string]string, out interface{}) error {
 	url := strings.Join([]string{c.config.Address, path}, "")
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	q := req.URL.Query()
+	if query != nil {
+		for key, value := range query {
+			q.Add(key, value)
+		}
+	}
+
+	// assign encoded query string to http request
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := c.config.HttpClient.Do(req)
 	if err != nil {
 		return err
 	}

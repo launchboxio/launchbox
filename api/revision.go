@@ -1,29 +1,29 @@
 package api
 
-type Revision struct {
+type Revisions struct {
 	c *Client
 }
 
-func (c *Client) Revision() *Revision {
-	return &Revision{c}
+func (c *Client) Revisions() *Revisions {
+	return &Revisions{c}
 }
 
-func (a *Revision) List() {
-
-}
-
-func (a *Revision) Create() {
+func (a *Revisions) List() {
 
 }
 
-func (a *Revision) Update() {
+func (a *Revisions) Create() {
 
 }
 
-func (a *Revision) Delete() {
+func (a *Revisions) Update() {
 
 }
 
-func (a *Revision) Find() {
+func (a *Revisions) Delete() {
+
+}
+
+func (a *Revisions) Find() {
 
 }
