@@ -1,29 +1,47 @@
 package api
 
-type Project struct {
+import (
+	"gorm.io/gorm"
+	"time"
+)
+
+type Projects struct {
 	c *Client
 }
 
-func (c *Client) Project() *Project {
-	return &Project{c}
+type Project struct {
+	gorm.Model
+	ID            uint           `gorm:"primaryKey" json:"id"`
+	Name          string         `json:"name"`
+	Repo          string         `json:"repo"`
+	Branch        string         `json:"branch,omitempty"`
+	ApplicationID uint           `json:"application_id"`
+	Application   Application    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CreatedAt     time.Time      `json:"created_at,omitempty"`
+	UpdatedAt     time.Time      `json:"updated_at,omitempty"`
+	Deleted       gorm.DeletedAt `json:"deleted,omitempty"`
 }
 
-func (a *Project) List() {
+func (c *Client) Projects() *Projects {
+	return &Projects{c}
+}
+
+func (a *Projects) List() {
 
 }
 
-func (a *Project) Create() {
+func (a *Projects) Create() {
 
 }
 
-func (a *Project) Update() {
+func (a *Projects) Update() {
 
 }
 
-func (a *Project) Delete() {
+func (a *Projects) Delete() {
 
 }
 
-func (a *Project) Find() {
+func (a *Projects) Find() {
 
 }

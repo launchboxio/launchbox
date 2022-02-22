@@ -55,7 +55,7 @@ func (a *Applications) Update(c *gin.Context) {
 	database.First(&app, id)
 	app.Name = update.Name
 	database.Save(&app)
-	c.JSON(http.StatusOK, gin.H{"data": app})
+	c.JSON(http.StatusOK, app)
 }
 
 func (a *Applications) Delete(c *gin.Context) {

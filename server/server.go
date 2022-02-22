@@ -33,6 +33,7 @@ func init() {
 	}
 	err = db.AutoMigrate(
 		&api.Application{},
+		&api.Projects{},
 	)
 	if err != nil {
 		panic(err)
