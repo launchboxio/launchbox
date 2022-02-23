@@ -1,7 +1,8 @@
 package command
 
 import (
-	"fmt"
+	"context"
+	"github.com/buildpacks/pack/pkg/client"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +11,17 @@ var (
 		Use:   "create",
 		Short: "Start a build",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Starting a build")
+			builder, err := client.NewClient()
+			if err != nil {
+				panic(err)
+			}
+			err = builder.Build(context.TODO(), client.BuildOptions{
+				Image:   "app",
+				Builder: "paketobuildpacks/builder:base",
+			})
+			if err != nil {
+				panic(err)
+			}
 		},
 	}
 )

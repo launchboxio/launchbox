@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"gorm.io/driver/postgres"
@@ -21,12 +22,15 @@ func New(opts *ServerOpts) *Server {
 	r := gin.Default()
 	server := &Server{r: r}
 
+	initServer()
+
 	server.initControllers()
 
 	return server
 }
 
-func init() {
+func initServer() {
+	fmt.Println("Initing our server")
 	db, err := gorm.Open(postgres.Open("host=localhost user=launchbox password=password dbname=launchbox port=5432 sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
