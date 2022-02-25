@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"github.com/RichardKnop/machinery/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"gorm.io/driver/postgres"
@@ -9,7 +9,8 @@ import (
 )
 
 type ServerOpts struct {
-	Port int64
+	Port     int64
+	RedisUrl string
 }
 
 type Server struct {
@@ -17,20 +18,31 @@ type Server struct {
 }
 
 var database *gorm.DB
+var taskServer *machinery.Server
 
-func New(opts *ServerOpts) *Server {
+func Run(opts *ServerOpts) error {
 	r := gin.Default()
 	server := &Server{r: r}
 
 	initServer()
-
+	ts, err := NewTaskServer(&TaskServerConfig{RedisUrl: opts.RedisUrl})
+	if err != nil {
+		panic(err)
+	}
+	taskServer = ts
+	go func() {
+		err := RunWorker("machinery_tasks")
+		if err != nil {
+			panic(err)
+		}
+	}()
 	server.initControllers()
 
-	return server
+	err = server.Run()
+	return err
 }
 
 func initServer() {
-	fmt.Println("Initing our server")
 	db, err := gorm.Open(postgres.Open("host=localhost user=launchbox password=password dbname=launchbox port=5432 sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -39,6 +51,9 @@ func initServer() {
 		&api.Application{},
 		&api.Project{},
 		&api.Revision{},
+		&api.Secret{},
+		&api.Build{},
+		&api.Task{},
 	)
 	if err != nil {
 		panic(err)

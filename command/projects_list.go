@@ -1,7 +1,6 @@
 package command
 
 import (
-	"fmt"
 	"github.com/robwittman/launchbox/api"
 	"github.com/spf13/cobra"
 	"strconv"
@@ -16,7 +15,6 @@ var (
 			ui := NewUI()
 
 			applicationId, _ := cmd.Flags().GetUint("application-id")
-			fmt.Println(applicationId)
 			apps, err := client.Projects().List(&api.ProjectListOptions{
 				ApplicationId: strconv.FormatUint(uint64(applicationId), 10),
 			})

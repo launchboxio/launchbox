@@ -16,7 +16,7 @@ var (
 				panic(err)
 			}
 			err = builder.Build(context.TODO(), client.BuildOptions{
-				Image:   "app",
+				Image:   "launchbox",
 				Builder: "paketobuildpacks/builder:base",
 			})
 			if err != nil {

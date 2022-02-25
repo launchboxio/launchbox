@@ -1,0 +1,7 @@
+---
+builder: paketobuildpacks/builder:base
+
+ports:
+  - name: web
+    port: 8080
+

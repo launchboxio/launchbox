@@ -1,21 +1,37 @@
 package api
 
-type Build struct {
+import (
+	uuid "github.com/satori/go.uuid"
+	"gorm.io/gorm"
+	"time"
+)
+
+type Builds struct {
 	c *Client
 }
 
-func (c *Client) Build() *Build {
-	return &Build{c}
+type Build struct {
+	ID         uuid.UUID      `gorm:"type:uuid;primary_key"`
+	Status     string         `json:"status"`
+	RevisionID uint           `json:"revision_id"`
+	Revision   Revision       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
+	CreatedAt  time.Time      `json:"created_at,omitempty"`
+	UpdatedAt  time.Time      `json:"updated_at,omitempty"`
+	Deleted    gorm.DeletedAt `json:"deleted,omitempty"`
 }
 
-func (b *Build) Create() {
+func (c *Client) Builds() *Builds {
+	return &Builds{c}
+}
+
+func (b *Builds) Create() {
 
 }
 
-func (b *Build) Cancel() {
+func (b *Builds) Cancel() {
 
 }
 
-func (b *Build) Get() {
-	
+func (b *Builds) Get() {
+
 }

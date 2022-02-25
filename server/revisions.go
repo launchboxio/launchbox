@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"net/http"
@@ -38,9 +37,7 @@ func (rev *Revisions) Create(c *gin.Context) {
 	err := c.ShouldBind(&revision)
 	projectId, _ := strconv.ParseUint(c.Param("projectId"), 10, 0)
 	revision.ProjectID = uint(projectId)
-	fmt.Println(revision)
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
 	database.Create(&revision)

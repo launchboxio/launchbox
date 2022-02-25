@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	haikunator "github.com/atrox/haikunatorgo/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"net/http"
@@ -21,9 +22,7 @@ func (a *Applications) Register(r *gin.Engine) {
 
 func (a *Applications) List(c *gin.Context) {
 	var apps []api.Application
-	fmt.Println(apps)
 	database.Find(&apps)
-	fmt.Println(&apps)
 	c.JSON(http.StatusOK, gin.H{"applications": &apps})
 }
 
@@ -35,12 +34,20 @@ func (a *Applications) Get(c *gin.Context) {
 }
 
 func (a *Applications) Create(c *gin.Context) {
-	app := api.Application{}
+	haikunator := haikunator.New()
+	app := &api.Application{}
 	err := c.ShouldBind(&app)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
+	app.Namespace = haikunator.Haikunate()
 	database.Create(&app)
+
+	res, err := createNamespaceTask(app)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res.Signature.UUID)
 	c.JSON(http.StatusOK, app)
 }
 

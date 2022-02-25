@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/hashicorp/go-cleanhttp"
 	"io"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -130,7 +129,7 @@ func decodeResponse(resBody io.ReadCloser, out interface{}) error {
 	}
 	err = json.Unmarshal(body, out)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	if err != nil {
 		return err

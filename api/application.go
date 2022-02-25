@@ -13,9 +13,14 @@ type Apps struct {
 type Application struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	Name      string         `json:"name"`
+	Namespace string         `gorm:"uniqueIndex" json:"namespace,omitempty"`
 	CreatedAt time.Time      `json:"created_at,omitempty"`
 	UpdatedAt time.Time      `json:"updated_at,omitempty"`
 	Deleted   gorm.DeletedAt `json:"deleted,omitempty"`
+}
+
+func (a *Application) GetNamespace() string {
+	return fmt.Sprintf("lb-app-%s", a.Name)
 }
 
 type ApplicationListResponse struct {

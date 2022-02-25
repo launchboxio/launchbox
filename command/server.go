@@ -14,10 +14,16 @@ var (
 )
 
 func RunServer(cmd *cobra.Command, args []string) {
-	opts := &server2.ServerOpts{}
-	server := server2.New(opts)
-	err := server.Run()
+	redisUrl, _ := cmd.Flags().GetString("redis-url")
+	opts := &server2.ServerOpts{
+		RedisUrl: redisUrl,
+	}
+	err := server2.Run(opts)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func init() {
+	serverCmd.Flags().String("redis-url", "localhost:6379", "The Redis connection for task management")
 }
