@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"net/http"
@@ -33,12 +34,16 @@ func (p *Projects) Get(c *gin.Context) {
 }
 
 func (p *Projects) Create(c *gin.Context) {
-	project := api.Project{}
+	project := &api.Project{}
 	err := c.ShouldBind(&project)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
 	database.Create(&project)
+	_, err = createServiceTask(project.ApplicationID, project.ID)
+	if err != nil {
+		fmt.Println(err)
+	}
 	c.JSON(http.StatusOK, project)
 }
 

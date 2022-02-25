@@ -43,7 +43,7 @@ func (a *Applications) Create(c *gin.Context) {
 	app.Namespace = haikunator.Haikunate()
 	database.Create(&app)
 
-	res, err := createNamespaceTask(app)
+	res, err := createNamespaceTask(app.ID)
 	if err != nil {
 		fmt.Println(err)
 	}

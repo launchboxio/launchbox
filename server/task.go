@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 var nullArgs = []tasks.Arg{}
@@ -47,14 +48,28 @@ func createTask(name string, args []tasks.Arg, refObject string, refId uint) (*r
 	return res, nil
 }
 
-func createNamespaceTask(app *api.Application) (*result.AsyncResult, error) {
+func createNamespaceTask(applicationId uint) (*result.AsyncResult, error) {
 	return createTask("namespace.create", []tasks.Arg{{
-		Type:  "string",
-		Value: app.Namespace,
-	}}, "namespace", app.ID)
+		Type:  "uint",
+		Value: applicationId,
+	}}, "Application", applicationId)
+}
+
+func createServiceTask(applicationId uint, projectId uint) (*result.AsyncResult, error) {
+	return createTask("service.create", []tasks.Arg{{
+		Type:  "uint",
+		Value: applicationId,
+	}, {
+		Type:  "uint",
+		Value: projectId,
+	}}, "Project", projectId)
 }
 
 func Tasks() map[string]interface{} {
+	apiClient, err := api.New()
+	if err != nil {
+		panic(err)
+	}
 	// TODO: This should also support in-cluster configuration
 	kubeconfig := filepath.Join(
 		os.Getenv("HOME"), ".kube", "config",
@@ -66,16 +81,41 @@ func Tasks() map[string]interface{} {
 	clientset, err := kubernetes.NewForConfig(config)
 
 	return map[string]interface{}{
-		"namespace.create": func(namespace string) error {
-			_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), &v1.Namespace{
+		"namespace.create": func(applicationId uint) error {
+			app, err := apiClient.Apps().Find(applicationId)
+			if err != nil {
+				return err
+			}
+			_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), &v1.Namespace{
 				ObjectMeta: v12.ObjectMeta{
-					Name: namespace,
+					Name: app.Namespace,
+					Labels: map[string]string{
+						"launchbox.io/application.id": strconv.Itoa(int(app.ID)),
+					},
 				},
 			}, v12.CreateOptions{})
 			return err
 		},
-		"service.create": func(namespace string, service string) error {
-			return nil
+		"service.create": func(applicationId uint, projectId uint) error {
+			// Create a service account
+			app, err := apiClient.Apps().Find(applicationId)
+			if err != nil {
+				return err
+			}
+			project, err := apiClient.Projects().Find(projectId)
+			if err != nil {
+				return err
+			}
+			_, err = clientset.CoreV1().ServiceAccounts(app.Namespace).Create(context.TODO(), &v1.ServiceAccount{
+				ObjectMeta: v12.ObjectMeta{
+					Name: project.GetFriendlyName(),
+					Labels: map[string]string{
+						"launchbox.io/application.id": strconv.Itoa(int(app.ID)),
+						"launchbox.io/project.id":     strconv.Itoa(int(project.ID)),
+					},
+				},
+			}, v12.CreateOptions{})
+			return err
 		},
 	}
 }

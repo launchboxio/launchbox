@@ -3,6 +3,8 @@ package api
 import (
 	"fmt"
 	"gorm.io/gorm"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -20,6 +22,15 @@ type Project struct {
 	CreatedAt     time.Time      `json:"created_at,omitempty"`
 	UpdatedAt     time.Time      `json:"updated_at,omitempty"`
 	Deleted       gorm.DeletedAt `json:"deleted,omitempty"`
+}
+
+func (p *Project) GetFriendlyName() string {
+	reg, err := regexp.Compile("[^A-Za-z0-9]+")
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return strings.ToLower(reg.ReplaceAllString(p.Name, "-"))
 }
 
 type ProjectListResponse struct {
