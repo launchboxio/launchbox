@@ -58,6 +58,13 @@ func createNamespaceTask(applicationId uint) (*result.AsyncResult, error) {
 	}}, "Application", applicationId)
 }
 
+func deleteNamespaceTask(applicationId uint) (*result.AsyncResult, error) {
+	return createTask("namespace.delete", []tasks.Arg{{
+		Type:  "uint",
+		Value: applicationId,
+	}}, "Application", applicationId)
+}
+
 func createServiceTask(applicationId uint, projectId uint) (*result.AsyncResult, error) {
 	return createTask("service.create", []tasks.Arg{{
 		Type:  "uint",
@@ -90,6 +97,7 @@ func Tasks() map[string]interface{} {
 	return map[string]interface{}{
 		"namespace.create": th.syncNamespace,
 		"namespace.sync":   th.syncNamespace,
+		"namespace.delete": th.deleteNamespace,
 		"service.create":   th.syncServiceAccount,
 	}
 }
@@ -102,7 +110,7 @@ type TaskHandler struct {
 
 func (th *TaskHandler) syncNamespace(applicationId uint) error {
 
-	app, err := th.apiClient.Apps().Find(applicationId)
+	app, err := th.apiClient.Apps().Find(applicationId, &api.ApplicationFindOptions{})
 	if err != nil {
 		return err
 	}
@@ -134,7 +142,7 @@ func (th *TaskHandler) syncNamespace(applicationId uint) error {
 }
 
 func (th *TaskHandler) syncServiceAccount(applicationId uint, projectId uint) error {
-	app, err := th.apiClient.Apps().Find(applicationId)
+	app, err := th.apiClient.Apps().Find(applicationId, &api.ApplicationFindOptions{})
 	if err != nil {
 		return err
 	}
@@ -162,6 +170,21 @@ func (th *TaskHandler) syncServiceAccount(applicationId uint, projectId uint) er
 
 	_, err = th.kubeClient.CoreV1().ServiceAccounts(app.Namespace).Update(context.TODO(), serviceAccount, v12.UpdateOptions{})
 	return err
+}
+
+func (th *TaskHandler) deleteNamespace(applicationId uint) error {
+	app, err := th.apiClient.Apps().Find(applicationId, &api.ApplicationFindOptions{Deleted: true})
+	if err != nil {
+		return err
+	}
+	_, err = th.kubeClient.CoreV1().Namespaces().Get(context.TODO(), app.Namespace, v12.GetOptions{})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	return th.kubeClient.CoreV1().Namespaces().Delete(context.TODO(), app.Namespace, v12.DeleteOptions{})
 }
 
 type TaskServerConfig struct {

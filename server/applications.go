@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/robwittman/launchbox/api"
 	"net/http"
+	"strconv"
 )
 
 type Applications struct {
@@ -29,7 +30,11 @@ func (a *Applications) List(c *gin.Context) {
 func (a *Applications) Get(c *gin.Context) {
 	id := c.Param("applicationId")
 	var app api.Application
-	database.First(&app, id)
+	if c.Query("deleted") != "" {
+		database.Unscoped().First(&app, id)
+	} else {
+		database.First(&app, id)
+	}
 	c.JSON(http.StatusOK, &app)
 }
 
@@ -69,6 +74,12 @@ func (a *Applications) Update(c *gin.Context) {
 }
 
 func (a *Applications) Delete(c *gin.Context) {
-	database.Where("id = ?", c.Param("applicationId")).Delete(&api.Application{})
+	applicationId := c.Param("applicationId")
+	database.Where("id = ?", applicationId).Delete(&api.Application{})
+	id, _ := strconv.Atoi(applicationId)
+	_, err := deleteNamespaceTask(uint(id))
+	if err != nil {
+		fmt.Println(err)
+	}
 	c.JSON(http.StatusNoContent, gin.H{})
 }

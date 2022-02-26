@@ -14,7 +14,12 @@ var (
 			applicationId, _ := cmd.Flags().GetUint("application-id")
 			client, _ := api.New()
 
-			app, err := client.Apps().Find(applicationId)
+			opts := &api.ApplicationFindOptions{}
+			deleted, _ := cmd.Flags().GetBool("deleted")
+			if deleted == true {
+				opts.Deleted = true
+			}
+			app, err := client.Apps().Find(applicationId, opts)
 			if err != nil {
 				panic(err)
 			}
@@ -22,3 +27,7 @@ var (
 		},
 	}
 )
+
+func init() {
+	applicationsGetCmd.Flags().Bool("deleted", false, "Show deleted applications")
+}

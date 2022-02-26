@@ -50,8 +50,16 @@ func (a *Apps) Delete(applicationId uint) error {
 	return a.c.delete(fmt.Sprintf("/applications/%d", applicationId))
 }
 
-func (a *Apps) Find(applicationId uint) (*Application, error) {
+type ApplicationFindOptions struct {
+	Deleted bool
+}
+
+func (a *Apps) Find(applicationId uint, options *ApplicationFindOptions) (*Application, error) {
 	app := &Application{}
-	err := a.c.get(fmt.Sprintf("/applications/%d", applicationId), nil, app)
+	query := map[string]string{}
+	if options.Deleted == true {
+		query["deleted"] = "true"
+	}
+	err := a.c.get(fmt.Sprintf("/applications/%d", applicationId), query, app)
 	return app, err
 }

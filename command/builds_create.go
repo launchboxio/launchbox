@@ -16,8 +16,9 @@ var (
 				panic(err)
 			}
 			err = builder.Build(context.TODO(), client.BuildOptions{
-				Image:   "launchbox",
-				Builder: "paketobuildpacks/builder:base",
+				Image:    "launchbox",
+				Builder:  "paketobuildpacks/builder:base",
+				Registry: "http://localhost:5000",
 			})
 			if err != nil {
 				panic(err)

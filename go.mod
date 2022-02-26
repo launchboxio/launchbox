@@ -4,7 +4,9 @@ go 1.17
 
 require (
 	github.com/RichardKnop/machinery/v2 v2.0.11
+	github.com/atrox/haikunatorgo/v2 v2.0.1
 	github.com/buildpacks/pack v0.24.0
+	github.com/centrifugal/centrifuge-go v0.8.2
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/hashicorp/go-cleanhttp v0.5.2
@@ -12,6 +14,7 @@ require (
 	github.com/spf13/cobra v1.3.0
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.1
+	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
 	k8s.io/client-go v0.23.4
 	sigs.k8s.io/controller-runtime v0.11.1
@@ -36,13 +39,11 @@ require (
 	github.com/Microsoft/hcsshim v0.8.23 // indirect
 	github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae // indirect
 	github.com/apex/log v1.9.0 // indirect
-	github.com/atrox/haikunatorgo/v2 v2.0.1 // indirect
 	github.com/aws/aws-sdk-go v1.37.16 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.2.0 // indirect
 	github.com/buildpacks/imgutil v0.0.0-20211203200417-76206845baac // indirect
 	github.com/buildpacks/lifecycle v0.13.3 // indirect
-	github.com/centrifugal/centrifuge-go v0.8.2 // indirect
 	github.com/centrifugal/protocol v0.7.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/containerd/cgroups v1.0.1 // indirect
@@ -175,7 +176,6 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/api v0.23.4 // indirect
 	k8s.io/apiextensions-apiserver v0.23.4 // indirect
 	k8s.io/component-base v0.23.4 // indirect
 	k8s.io/klog/v2 v2.40.1 // indirect
