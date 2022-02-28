@@ -1,21 +1,33 @@
-import {Container, Row, Col, Card, Text} from '@nextui-org/react';
+import {Grid, Button, Row, Col, Card, Text, Divider, Link} from '@nextui-org/react';
 
 export default function ApplicationsList({data}) {
-    console.log(data)
   return (
-      <Container>
+      <Grid.Container gap={2}>
           {data.applications.map((item, index) => {
               return (
-                  <Card color={"primary"}>
-                      <Row justify={"center"} align={"center"}>
-                          <Text h6 size={15} color="white" css={{ m: 0 }}>
+                  <Grid xs={12}>
+                      <Card key={item.id}>
+                          <Card.Header>
                               {item.name}
-                          </Text>
-                      </Row>
-                  </Card>
+                          </Card.Header>
+                          <Divider />
+                          <Card.Body css={{ py: '$10'}}>
+                              <Text>Lorem ipsum</Text>
+                          </Card.Body>
+                          <Divider />
+                          <Card.Footer>
+                              <Row justify={"flex-end"}>
+                                  <Link href={`applications/${item.id}`}>View</Link>
+                              </Row>
+                          </Card.Footer>
+                      </Card>
+                  </Grid>
               )
           })}
-      </Container>
+          <Link href={"/applications/new"}>
+              New Project
+          </Link>
+      </Grid.Container>
   )
 }
 
