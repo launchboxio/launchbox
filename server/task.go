@@ -89,10 +89,13 @@ func Tasks() map[string]interface{} {
 		panic(err)
 	}
 	clientset, err := kubernetes.NewForConfig(config)
+
+	centrifuge := centrifuge.NewJsonClient("ws://localhost:8000/connection/websocket", centrifuge.DefaultConfig())
+
 	th := TaskHandler{
 		kubeClient: clientset,
 		apiClient:  apiClient,
-		centrifuge: nil,
+		centrifuge: centrifuge,
 	}
 	return map[string]interface{}{
 		"namespace.create": th.syncNamespace,

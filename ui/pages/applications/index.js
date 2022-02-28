@@ -25,7 +25,7 @@ export default function ApplicationsList({data}) {
               )
           })}
           <Link href={"/applications/new"}>
-              New Project
+              New Application
           </Link>
       </Grid.Container>
   )
