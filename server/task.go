@@ -115,11 +115,13 @@ func (th *TaskHandler) syncNamespace(applicationId uint) error {
 		return err
 	}
 
+	stringApplicationId := strconv.Itoa(int(app.ID))
+
 	ns := &v1.Namespace{
 		ObjectMeta: v12.ObjectMeta{
 			Name: app.Namespace,
 			Labels: map[string]string{
-				"launchbox.io/application.id":     strconv.Itoa(int(app.ID)),
+				"launchbox.io/application.id":     stringApplicationId,
 				"openservicemesh.io/monitored-by": "osm",
 			},
 			Annotations: map[string]string{
@@ -132,11 +134,18 @@ func (th *TaskHandler) syncNamespace(applicationId uint) error {
 		if errors.IsNotFound(err) {
 			fmt.Println("Creating namespace")
 			_, err = th.kubeClient.CoreV1().Namespaces().Create(context.TODO(), ns, v12.CreateOptions{})
+			if err != nil {
+				return err
+			}
+			th.publishApplicationEvent(stringApplicationId, []byte{})
 			return err
 		}
 	}
 	fmt.Println("Updating namespace")
 	_, err = th.kubeClient.CoreV1().Namespaces().Update(context.TODO(), ns, v12.UpdateOptions{})
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -185,6 +194,13 @@ func (th *TaskHandler) deleteNamespace(applicationId uint) error {
 		return err
 	}
 	return th.kubeClient.CoreV1().Namespaces().Delete(context.TODO(), app.Namespace, v12.DeleteOptions{})
+}
+
+func (th *TaskHandler) publishApplicationEvent(appChannel string, data []byte) {
+	_, err := th.centrifuge.Publish(appChannel, data)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 type TaskServerConfig struct {
