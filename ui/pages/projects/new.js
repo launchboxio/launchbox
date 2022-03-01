@@ -2,12 +2,12 @@ import {Button, Grid, Input} from '@nextui-org/react';
 import {useState} from "react";
 import {useRouter} from "next/router";
 
-export default function ApplicationCreate({data}) {
+export default function Projectreate({data}) {
     const [name, setName] = useState("")
     const router = useRouter()
     const handleSubmit = async (event) => {
         event.preventDefault()
-        const res = await fetch('http://localhost:8080/applications', {
+        const res = await fetch('http://localhost:8080/projects', {
             body: JSON.stringify({ name }),
             headers: {
                 "Content-Type": "application/json"
@@ -17,15 +17,15 @@ export default function ApplicationCreate({data}) {
 
         const data = await res.json()
 
-        router.push({ pathname: `/applications/${data.id}` })
+        router.push({ pathname: `/projects/${data.id}` })
     }
 
     return (
         <>
-            <h3>Creating new application</h3>
+            <h3>Creating new project</h3>
             <Grid.Container gap={2}>
                 <form onSubmit={handleSubmit}>
-                    <Input label="Application Name" placeholder="My awesome app" value={name} onChange={(evt) => {
+                    <Input label="Project Name" placeholder="My awesome project" value={name} onChange={(evt) => {
                         setName(evt.target.value)
                     }}/>
                     <Button type={"submit"}>Submit</Button>
