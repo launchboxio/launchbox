@@ -11,8 +11,11 @@ import (
 )
 
 type ServerOpts struct {
-	Port     int64
-	RedisUrl string
+	Port          int64
+	RedisUrl      string
+	PrometheusUrl string
+	LokiUrl       string
+	VaultUrl      string
 }
 
 type Server struct {
@@ -46,7 +49,7 @@ func Run(opts *ServerOpts) error {
 			panic(err)
 		}
 	}()
-	server.initControllers()
+	server.initControllers(opts)
 
 	err = server.Run()
 	return err
@@ -75,8 +78,10 @@ func (s *Server) Run() error {
 	return s.r.Run()
 }
 
-func (s *Server) initControllers() {
+func (s *Server) initControllers(opts *ServerOpts) {
 	(&Applications{}).Register(s.r)
 	(&Projects{}).Register(s.r)
 	(&Revisions{}).Register(s.r)
+	(&Logs{}).Register(s.r)
+	(&Metrics{PrometheusUrl: opts.PrometheusUrl}).Register(s.r)
 }

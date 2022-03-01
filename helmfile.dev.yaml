@@ -1,0 +1,84 @@
+repositories:
+  - name: prometheus-community
+    url: https://prometheus-community.github.io/helm-charts
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+  - name: hashicorp
+    url: https://helm.releases.hashicorp.com
+  - name: twuni
+    url: https://helm.twun.io
+  - name: ealenn
+    url: https://ealenn.github.io/charts
+
+helmDefaults:
+  kubeContext: minikube
+
+
+releases:
+  - name: prometheus-operator
+    namespace: observability
+    chart: prometheus-community/kube-prometheus-stack
+    version: 33.1.0
+    disableValidationOnInstall: true
+    values:
+      - defaultRules:
+          create: false
+      - alertmanager:
+          enabled: false
+      - prometheus:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - prometheus.launchbox.local
+            paths:
+              - /
+
+  - name: loki
+    namespace: observability
+    chart: grafana/loki-stack
+    version: 2.6.1
+    values:
+      - grafana:
+          enabled: false
+      - prometheus:
+          enabled: false
+      - loki:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - host: loki.launchbox.local
+                paths:
+                  - /
+
+  - name: vault
+    namespace: vault
+    chart: hashicorp/vault
+    version: 0.19.0
+    values:
+      - ingress:
+          enabled: true
+          ingressClassName: nginx
+          hosts:
+            - host: vault.launchbox.local
+              paths: []
+
+  - name: registry
+    namespace: default
+    chart: twuni/docker-registry
+    version: 2.1.0
+    values:
+      - persistence:
+          enabled: true
+      - ingress:
+          enabled: true
+          className: nginx
+          hosts:
+            - registry.launchbox.local
+          paths:
+            - /
+
+  - name: echo-server
+    namespace: default
+    chart: ealenn/echo-server

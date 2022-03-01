@@ -126,6 +126,7 @@ func (th *TaskHandler) syncNamespace(applicationId uint) error {
 			Labels: map[string]string{
 				"launchbox.io/application.id":     stringApplicationId,
 				"openservicemesh.io/monitored-by": "osm",
+				"openservicemesh.io/metrics":      "enabled",
 			},
 			Annotations: map[string]string{
 				"openservicemesh.io/sidecar-injection": "enabled",
