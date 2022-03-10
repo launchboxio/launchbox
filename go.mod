@@ -7,6 +7,7 @@ require (
 	github.com/atrox/haikunatorgo/v2 v2.0.1
 	github.com/buildpacks/pack v0.24.0
 	github.com/centrifugal/centrifuge-go v0.8.2
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/hashicorp/go-cleanhttp v0.5.2
@@ -63,7 +64,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell/v2 v2.4.0 // indirect
-	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
 	github.com/go-logr/zapr v1.2.3 // indirect
