@@ -5,5 +5,5 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: launchbox
-repo: github.com/robwittman/launchbox
+repo: github.com/launchboxio/launchbox
 version: "3"

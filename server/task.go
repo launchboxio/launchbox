@@ -11,7 +11,7 @@ import (
 	redislock "github.com/RichardKnop/machinery/v2/locks/redis"
 	"github.com/RichardKnop/machinery/v2/tasks"
 	"github.com/centrifugal/centrifuge-go"
-	"github.com/robwittman/launchbox/api"
+	"github.com/launchboxio/launchbox/api"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"

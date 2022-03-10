@@ -4,7 +4,7 @@ import (
 	"github.com/RichardKnop/machinery/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/launchbox/api"
+	"github.com/launchboxio/launchbox/api"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"time"
