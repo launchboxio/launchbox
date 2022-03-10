@@ -23,7 +23,7 @@ jobs:
         run: |
           formatted_count=$(gofmt -s -l . | wc -l)
           if [ "${formatted_count}" -ne 0 ] ; then
-            echo "Run 'go fmt github.com/noteable-io/gish...'"
+            echo "Run 'go fmt github.com/robwittman/launchbox...'"
             exit 1
           fi
   test:
