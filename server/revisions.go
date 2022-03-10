@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/launchbox/api"
+	"github.com/launchboxio/launchbox/api"
 	"net/http"
 	"strconv"
 )

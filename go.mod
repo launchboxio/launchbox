@@ -1,4 +1,4 @@
-module github.com/robwittman/launchbox
+module github.com/launchboxio/launchbox
 
 go 1.17
 

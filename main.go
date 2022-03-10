@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/robwittman/launchbox/command"
+	"github.com/launchboxio/launchbox/command"
 )
 
 func main() {

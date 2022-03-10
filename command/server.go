@@ -1,7 +1,7 @@
 package command
 
 import (
-	server2 "github.com/robwittman/launchbox/server"
+	server2 "github.com/launchboxio/launchbox/server"
 	"github.com/spf13/cobra"
 )
 
