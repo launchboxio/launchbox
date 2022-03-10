@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/robwittman/launchbox/api"
+	"github.com/launchboxio/launchbox/api"
 	"github.com/spf13/cobra"
 	"strconv"
 )

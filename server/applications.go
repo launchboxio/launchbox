@@ -4,7 +4,7 @@ import (
 	"fmt"
 	haikunator "github.com/atrox/haikunatorgo/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/robwittman/launchbox/api"
+	"github.com/launchboxio/launchbox/api"
 	"net/http"
 	"strconv"
 )
