@@ -2,3 +2,15 @@
 # Ignore build and test binaries.
 bin/
 testbin/
+deploy/
+.github/
+.dockerignore
+.gitignore
+config.json
+docker-compose.yml
+Dockerfile
+helmfile.dev.yaml
+launchbox.yaml
+Makefile
+PROJECT
+TODO.md
