@@ -7,7 +7,7 @@ import (
 )
 
 type Metrics struct {
-	PrometheusUrl string
+	Config PrometheusConfig
 }
 
 var NamedQueries = map[string]string{
@@ -23,8 +23,18 @@ var NamedQueries = map[string]string{
 	"PROJECT_HTTP_ERRORS_PER_MINUTE":   "",
 }
 
+func verifyMetricsEnabled(conf PrometheusConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !conf.Enabled {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Metrics feature not enabled"})
+			return
+		}
+	}
+}
 func (m *Metrics) Register(r *gin.Engine) {
 	group := r.Group("/metrics")
+	group.Use(verifyMetricsEnabled(m.Config))
+
 	group.GET("", m.Query)
 
 }

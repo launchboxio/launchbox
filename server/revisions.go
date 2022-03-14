@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/launchboxio/launchbox/api"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
@@ -40,8 +41,27 @@ func (rev *Revisions) Create(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
-	database.Create(&revision)
-	c.JSON(http.StatusOK, revision)
+	revision.Status = api.RevisionStatusDeploying
+
+	err = database.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&revision).Error; err != nil {
+			return err
+		}
+
+		if err = tx.Where("id = ?", revision.ProjectID).Update("status", api.ProjectStatusUpdating).Error; err != nil {
+			return err
+		}
+
+		// return nil will commit the whole transaction
+		return nil
+	})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Faied creating revision",
+		})
+	} else {
+		c.JSON(http.StatusOK, revision)
+	}
 }
 
 func (rev *Revisions) Update(c *gin.Context) {

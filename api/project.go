@@ -12,11 +12,21 @@ type Projects struct {
 	c *Client
 }
 
+type ProjectStatus string
+
+const (
+	ProjectStatusCreating ProjectStatus = "creating"
+	ProjectStatusUpdating ProjectStatus = "updating"
+	ProjectStatusDeleting ProjectStatus = "deleting"
+	ProjectStatusActive   ProjectStatus = "spring"
+)
+
 type Project struct {
 	ID            uint           `gorm:"primaryKey" json:"id"`
 	Name          string         `json:"name"`
 	Repo          string         `json:"repo"`
 	Branch        string         `json:"branch,omitempty"`
+	Status        ProjectStatus  `json:"string"`
 	ApplicationID uint           `json:"application_id"`
 	Application   Application    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
 	CreatedAt     time.Time      `json:"created_at,omitempty"`
