@@ -39,20 +39,19 @@ func (a *Applications) Get(c *gin.Context) {
 }
 
 func (a *Applications) Create(c *gin.Context) {
-	haikunator := haikunator.New()
+	haiku := haikunator.New()
 	app := &api.Application{}
 	err := c.ShouldBind(&app)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 	}
-	app.Namespace = haikunator.Haikunate()
+	app.Namespace = haiku.Haikunate()
 	database.Create(&app)
 
-	res, err := createNamespaceTask(app.ID)
+	_, err = createNamespaceTask(app.ID)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(res.Signature.UUID)
 	c.JSON(http.StatusOK, app)
 }
 

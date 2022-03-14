@@ -27,6 +27,4 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 func init() {
 	serverCmd.Flags().StringP("config", "c", "config.yaml", "The location of server configuration file")
-
-	_ = serverCmd.MarkFlagRequired("config")
 }
