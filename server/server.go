@@ -7,16 +7,7 @@ import (
 	"github.com/launchboxio/launchbox/api"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"time"
 )
-
-type ServerOpts struct {
-	Port          int64
-	RedisUrl      string
-	PrometheusUrl string
-	LokiUrl       string
-	VaultUrl      string
-}
 
 type Server struct {
 	r *gin.Engine
@@ -25,31 +16,40 @@ type Server struct {
 var database *gorm.DB
 var taskServer *machinery.Server
 
-func Run(opts *ServerOpts) error {
+func Run(configFile string) error {
+	// First things first load our config
+	config, err := LoadDefaultConfig(configFile)
+	if err != nil {
+		return err
+	}
+
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"*"},
-		AllowHeaders:     []string{"Origin", "Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		AllowOrigins:     config.Cors.AllowOrigins,
+		AllowMethods:     config.Cors.AllowMethods,
+		AllowHeaders:     config.Cors.AllowHeaders,
+		ExposeHeaders:    config.Cors.ExposeHeaders,
+		AllowCredentials: config.Cors.AllowCredentials,
+		MaxAge:           config.Cors.MaxAge,
 	}))
 	server := &Server{r: r}
 
 	initServer()
-	ts, err := NewTaskServer(&TaskServerConfig{RedisUrl: opts.RedisUrl})
+	ts, err := NewTaskServer(&TaskServerConfig{
+		RedisUrl: config.Redis.Url,
+	})
+
 	if err != nil {
 		panic(err)
 	}
 	taskServer = ts
 	go func() {
-		err := RunWorker("machinery_tasks")
+		err := RunWorker(config.Worker.ConsumerTag)
 		if err != nil {
 			panic(err)
 		}
 	}()
-	server.initControllers(opts)
+	server.initControllers(config)
 
 	err = server.Run()
 	return err
@@ -78,10 +78,12 @@ func (s *Server) Run() error {
 	return s.r.Run()
 }
 
-func (s *Server) initControllers(opts *ServerOpts) {
+func (s *Server) initControllers(config *Config) {
 	(&Applications{}).Register(s.r)
 	(&Projects{}).Register(s.r)
 	(&Revisions{}).Register(s.r)
 	(&Logs{}).Register(s.r)
-	(&Metrics{PrometheusUrl: opts.PrometheusUrl}).Register(s.r)
+	(&Metrics{
+		Config: config.Prometheus,
+	}).Register(s.r)
 }

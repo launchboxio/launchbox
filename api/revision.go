@@ -10,9 +10,18 @@ type Revisions struct {
 	c *Client
 }
 
+type RevisionStatus string
+
+const (
+	RevisionStatusDeploying  RevisionStatus = "deploying"
+	RevisionStatusSucceded   RevisionStatus = "succeeded"
+	RevisionStatusRolledBack RevisionStatus = "rolled_back"
+	RevisionStatusSuperceded RevisionStatus = "superceded"
+)
+
 type Revision struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
-	Status    string         `json:"status,omitempty"`
+	Status    RevisionStatus `json:"status,omitempty"`
 	CommitSha string         `json:"commit_sha,omitempty"`
 	ProjectID uint           `json:"project_id"`
 	Project   Project        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
