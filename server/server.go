@@ -7,6 +7,7 @@ import (
 	"github.com/launchboxio/launchbox/api"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"net/http"
 	"time"
 )
 
@@ -37,6 +38,7 @@ func Run(opts *ServerOpts) error {
 	}))
 	server := &Server{r: r}
 
+	r.GET("/", health)
 	initServer()
 	ts, err := NewTaskServer(&TaskServerConfig{RedisUrl: opts.RedisUrl})
 	if err != nil {
@@ -84,4 +86,8 @@ func (s *Server) initControllers(opts *ServerOpts) {
 	(&Revisions{}).Register(s.r)
 	(&Logs{}).Register(s.r)
 	(&Metrics{PrometheusUrl: opts.PrometheusUrl}).Register(s.r)
+}
+
+func health(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "up"})
 }

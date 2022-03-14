@@ -53,3 +53,34 @@ jobs:
 
       - name: Build image and push to GitHub Container Registry
         uses: docker/build-push-action@v2
+
+  publish-helm-chart:
+    name: Package and publish helm chart
+    runs-on: ubuntu-latest
+
+    env:
+      HELM_EXPERIMENTAL_OCI: 1
+      HELM_VERSION_TO_INSTALL: 3.7.2
+      GCR_IMAGE: ghcr.io/${{ github.repository_owner }}/launchbox
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: ${{ env.HELM_VERSION_TO_INSTALL }}
+
+      - name: Login to ghcr
+        run: |
+          echo ${{ github.token }} | helm registry login ${{ env.GCR_IMAGE }} --username ${{ github.actor }} --password-stdin
+
+      - name: Save helm chart
+        run: |
+          helm chart save ${{ github.workspace }}/deploy/helm/launchbox/ ${{ env.GCR_IMAGE }}:${{ github.ref_name }}
+
+      - name: Publish chart
+        run: |
+          helm chart push ${{ env.GCR_IMAGE }}:${{ github.ref_name }}
+          

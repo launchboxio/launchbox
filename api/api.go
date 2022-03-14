@@ -6,15 +6,16 @@ import (
 	"io"
 	"k8s.io/apimachinery/pkg/util/json"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 )
 
 const (
 	HTTPAddrEnvName      = "LAUNCHBOX_HTTP_ADDR"
-	HTTPTokenEnvName     = "LAUNCHBOX_HTTP_TOKEN"
-	HTTPTokenFileEnvName = "LAUNCHBOX_HTTP_TOKEN_FILE"
 	HTTPAuthEnvName      = "LAUNCHBOX_HTTP_AUTH"
 	HTTPSSLEnvName       = "LAUNCHBOX_HTTP_SSL"
+	HTTPTLSServerName    = "LAUNCHBOX_TLS_SERVER_NAME"
 	HTTPCAFile           = "LAUNCHBOX_CACERT"
 	HTTPCAPath           = "LAUNCHBOX_CAPATH"
 	HTTPClientCert       = "LAUNCHBOX_CLIENT_CERT"
@@ -28,8 +29,19 @@ type Client struct {
 
 type Config struct {
 	Address    string
+	Scheme     string
 	Transport  *http.Transport
 	HttpClient *http.Client
+	TLSConfig  TLSConfig
+}
+
+type TLSConfig struct {
+	Address  string
+	CAFile   string
+	CAPath   string
+	CertFile string
+	KeyFile  string
+	Insecure bool
 }
 
 type PaginationOptions struct {
@@ -41,6 +53,33 @@ func defaultConfig(transportFn func() *http.Transport) *Config {
 	config := &Config{
 		Address:   "http://127.0.0.1:8080",
 		Transport: transportFn(),
+	}
+	if addr := os.Getenv(HTTPAddrEnvName); addr != "" {
+		config.Address = addr
+	}
+	if v := os.Getenv(HTTPTLSServerName); v != "" {
+		config.TLSConfig.Address = v
+	}
+	if v := os.Getenv(HTTPCAFile); v != "" {
+		config.TLSConfig.CAFile = v
+	}
+	if v := os.Getenv(HTTPCAPath); v != "" {
+		config.TLSConfig.CAPath = v
+	}
+	if v := os.Getenv(HTTPClientCert); v != "" {
+		config.TLSConfig.CertFile = v
+	}
+	if v := os.Getenv(HTTPClientKey); v != "" {
+		config.TLSConfig.KeyFile = v
+	}
+	if v := os.Getenv(HTTPSSLVerifyEnvName); v != "" {
+		verify, err := strconv.ParseBool(v)
+		if err == nil {
+			if !verify {
+				config.TLSConfig.Insecure = true
+			}
+		}
+
 	}
 	return config
 }
