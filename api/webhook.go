@@ -52,6 +52,6 @@ func (w *Webhooks) Delete(projectId, webhookId uint) error {
 func (w *Webhooks) Find(projectId uint, webhookId uint) (*Webhook, error) {
 	webhook := &Webhook{}
 	query := map[string]string{}
-	err := w.c.get(fmt.Sprintf("/projects/%d/webhooks", projectId, webhookId), query, webhook)
+	err := w.c.get(fmt.Sprintf("/projects/%d/webhooks/%d", projectId, webhookId), query, webhook)
 	return webhook, err
 }

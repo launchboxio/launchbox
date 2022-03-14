@@ -69,7 +69,7 @@ func (w *Webhooks) Create(c *gin.Context) {
 func (w *Webhooks) Receive(c *gin.Context) {
 	projectId, _ := strconv.ParseUint(c.Param("projectId"), 10, 0)
 	tokenId := c.Param("webhookToken")
-	fmt.Println("Received request webhook %s for project %d", tokenId, uint(projectId))
+	fmt.Printf("Received request webhook %s for project %d", tokenId, uint(projectId))
 }
 
 func (w *Webhooks) Update(c *gin.Context) {
