@@ -67,6 +67,7 @@ func initServer() {
 		&api.Secret{},
 		&api.Build{},
 		&api.Task{},
+		&api.Webhook{},
 	)
 	if err != nil {
 		panic(err)
@@ -86,4 +87,5 @@ func (s *Server) initControllers(config *Config) {
 	(&Metrics{
 		Config: config.Prometheus,
 	}).Register(s.r)
+	(&Webhooks{}).Register(s.r)
 }
