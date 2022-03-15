@@ -17,6 +17,8 @@ limitations under the License.
 package command
 
 import (
+	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
+	"github.com/launchboxio/launchbox/controllers"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -46,9 +48,10 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(launchboxiov1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 
-	operatorCmd.Flags().String("metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	operatorCmd.Flags().String("metrics-bind-address", ":8082", "The address the metric endpoint binds to.")
 	operatorCmd.Flags().String("health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	operatorCmd.Flags().Bool("leader-elect", false,
 		"Enable leader election for controller manager. "+
@@ -76,7 +79,13 @@ func RunOperator(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	//+kubebuilder:scaffold:builder
+	if err = (&controllers.ProjectReconciler{
+		Client: mgr.GetClient(),
+		Scheme: scheme,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Project")
+		os.Exit(1)
+	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")

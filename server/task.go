@@ -22,8 +22,6 @@ import (
 	"strconv"
 )
 
-var nullArgs = []tasks.Arg{}
-
 type Task struct {
 	Name string
 }
@@ -84,24 +82,23 @@ func Tasks() map[string]interface{} {
 	kubeconfig := filepath.Join(
 		os.Getenv("HOME"), ".kube", "config",
 	)
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	conf, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		panic(err)
 	}
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(conf)
 
-	centrifuge := centrifuge.NewJsonClient("ws://localhost:8000/connection/websocket", centrifuge.DefaultConfig())
+	centrifugeClient := centrifuge.NewJsonClient("ws://localhost:8000/connection/websocket", centrifuge.DefaultConfig())
 
 	th := TaskHandler{
 		kubeClient: clientset,
 		apiClient:  apiClient,
-		centrifuge: centrifuge,
+		centrifuge: centrifugeClient,
 	}
 	return map[string]interface{}{
 		"namespace.create": th.syncNamespace,
 		"namespace.sync":   th.syncNamespace,
 		"namespace.delete": th.deleteNamespace,
-		"service.create":   th.syncServiceAccount,
 	}
 }
 
@@ -151,37 +148,6 @@ func (th *TaskHandler) syncNamespace(applicationId uint) error {
 		return err
 	}
 
-	return err
-}
-
-func (th *TaskHandler) syncServiceAccount(applicationId uint, projectId uint) error {
-	app, err := th.apiClient.Apps().Find(applicationId, &api.ApplicationFindOptions{})
-	if err != nil {
-		return err
-	}
-	project, err := th.apiClient.Projects().Find(projectId)
-	if err != nil {
-		return err
-	}
-	serviceAccount := &v1.ServiceAccount{
-		ObjectMeta: v12.ObjectMeta{
-			Name: project.GetFriendlyName(),
-			Labels: map[string]string{
-				"launchbox.io/application.id": strconv.Itoa(int(app.ID)),
-				"launchbox.io/project.id":     strconv.Itoa(int(project.ID)),
-			},
-		},
-	}
-	_, err = th.kubeClient.CoreV1().ServiceAccounts(app.Namespace).Get(context.TODO(), project.GetFriendlyName(), v12.GetOptions{})
-	if err != nil {
-		if errors.IsNotFound(err) {
-			_, err = th.kubeClient.CoreV1().ServiceAccounts(app.Namespace).Create(context.TODO(), serviceAccount, v12.CreateOptions{})
-			return err
-		}
-		return err
-	}
-
-	_, err = th.kubeClient.CoreV1().ServiceAccounts(app.Namespace).Update(context.TODO(), serviceAccount, v12.UpdateOptions{})
 	return err
 }
 
