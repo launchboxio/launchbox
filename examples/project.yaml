@@ -1,0 +1,12 @@
+---
+apiVersion: launchbox.io/v1alpha1
+kind: Project
+metadata:
+  name: test-project
+spec:
+  branch: main
+  repo: https://github.com/launchboxio/launchbox
+  projectId: 1
+  applicationId: 1
+  metrics:
+    enabled: true
