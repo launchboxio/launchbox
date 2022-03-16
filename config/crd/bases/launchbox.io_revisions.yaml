@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
-  name: projects.launchbox.io
+  name: revisions.launchbox.io
 spec:
   group: launchbox.io
   names:
-    kind: Project
-    listKind: ProjectList
-    plural: projects
-    singular: project
+    kind: Revision
+    listKind: RevisionList
+    plural: revisions
+    singular: revision
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Project is the Schema for the projects API
+        description: Revision is the Schema for the revisions API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,41 +34,51 @@ spec:
           metadata:
             type: object
           spec:
-            description: ProjectSpec defines the desired state of Project
             properties:
-              applicationId:
-                type: integer
-              branch:
-                description: Foo is an example field of Project. Edit project_types.go
-                  to remove/update
+              commitSha:
                 type: string
-              metrics:
-                properties:
-                  enabled:
-                    type: boolean
-                required:
-                - enabled
-                type: object
-              name:
+              configMap:
                 type: string
-              projectId:
-                type: integer
-              repo:
+              image:
+                type: string
+              ports:
+                items:
+                  description: RevisionSpec defines the desired state of Revision
+                  properties:
+                    port:
+                      format: int32
+                      type: integer
+                    protocol:
+                      type: string
+                  required:
+                  - port
+                  type: object
+                type: array
+              projectName:
                 type: string
             required:
-            - applicationId
-            - metrics
-            - projectId
+            - configMap
+            - image
+            - ports
+            - projectName
             type: object
           status:
-            description: ProjectStatus defines the observed state of Project
+            description: RevisionStatus defines the observed state of Revision
             properties:
-              activeRevision:
-                type: integer
+              deployment:
+                type: string
+              service:
+                type: string
+              serviceAccount:
+                type: string
               state:
                 type: string
+              trafficPercentage:
+                type: integer
             required:
-            - activeRevision
+            - deployment
+            - service
+            - serviceAccount
             - state
             type: object
         type: object

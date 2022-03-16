@@ -15,4 +15,12 @@ resources:
   kind: Project
   path: github.com/launchboxio/launchbox/api/v1alpha1
   version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: launchbox.io
+  kind: Revision
+  path: github.com/launchboxio/launchbox/api/v1alpha1
+  version: v1alpha1
 version: "3"
