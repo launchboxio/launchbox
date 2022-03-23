@@ -82,6 +82,14 @@ releases:
               - prometheus.launchbox.local
             paths:
               - /
+      - grafana:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - grafana.launchbox.local
+            paths:
+              - /
 
   - name: loki
     namespace: observability
@@ -102,6 +110,15 @@ releases:
               - host: loki.launchbox.local
                 paths:
                   - /
+
+  - name: tempo
+    namespace: observability
+    chart: grafana/tempo
+    version: 0.14.2
+    values:
+      - searchEnabled: true
+      - serviceMonitor:
+          enabled: true
 
 #  - name: vault
 #    namespace: vault
