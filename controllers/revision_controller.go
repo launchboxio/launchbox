@@ -23,13 +23,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"strconv"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"strconv"
 
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 )
@@ -86,38 +85,11 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	// Create the serviceAccount
-	found := &v1.ServiceAccount{}
-	err = r.Get(ctx, types.NamespacedName{Name: revision.Name, Namespace: revision.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		sa := r.serviceAccountForRevision(project, revision)
-		out.Info("Creating a new Service Account", "ServiceAccount.Namespace", revision.Namespace, "ServiceAccount.Name", revision.Name)
-		err = r.Create(ctx, sa)
-		if err != nil {
-			out.Error(err, "Failed to create new service account", "ServiceAccount.Namespace", revision.Namespace, "ServiceAccount.Name", revision.Name)
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		out.Error(err, "Failed to get service account")
-		return ctrl.Result{}, err
-	}
-
-	if found.Name != revision.Status.ServiceAccount {
-		fmt.Println("Updating revision with new service account information")
-		revision.Status.ServiceAccount = found.Name
-		err := r.Status().Update(ctx, revision)
-		if err != nil {
-			out.Error(err, "Failed to update Revision status")
-			return ctrl.Result{}, err
-		}
-	}
-
 	// Create the service
 	foundService := &v1.Service{}
 	err = r.Get(ctx, types.NamespacedName{Name: revision.Name, Namespace: revision.Namespace}, foundService)
 	if err != nil && errors.IsNotFound(err) {
-		service := r.serviceForRevision(revision)
+		service := r.serviceForRevision(revision, project)
 		out.Info("Creating a new Service", "Service.Namespace", revision.Namespace, "Service.Name", revision.Name)
 		err = r.Create(ctx, service)
 		if err != nil {
@@ -130,7 +102,7 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if found.Name != revision.Status.Service {
+	if foundService.Name != revision.Status.Service {
 		fmt.Println("Updating revision with new service information")
 		revision.Status.Service = foundService.Name
 		err := r.Status().Update(ctx, revision)
@@ -144,7 +116,7 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	foundDeployment := &appsv1.Deployment{}
 	err = r.Get(ctx, types.NamespacedName{Name: revision.Name, Namespace: revision.Namespace}, foundDeployment)
 	if err != nil && errors.IsNotFound(err) {
-		deployment := r.deploymentForRevision(revision)
+		deployment := r.deploymentForRevision(revision, project)
 		out.Info("Creating a new Deployment", "Deployment.Namespace", revision.Namespace, "Deployment.Name", revision.Name)
 		err = r.Create(ctx, deployment)
 		if err != nil {
@@ -157,7 +129,7 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if found.Name != revision.Status.Deployment {
+	if foundDeployment.Name != revision.Status.Deployment {
 		fmt.Println("Updating revision with new deployment information")
 		revision.Status.Deployment = foundDeployment.Name
 		err := r.Status().Update(ctx, revision)
@@ -168,8 +140,6 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	// TODO: If autoscaling.enabled, create the HorizontalPodAutoscaler
-
-	// TODO: If metrics.enabled, create the serviceMonitor
 
 	// TODO: Create required OSM metrics resources
 
@@ -194,36 +164,11 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *RevisionReconciler) serviceAccountForRevision(
-	p *launchboxiov1alpha1.Project,
-	rev *launchboxiov1alpha1.Revision,
-) *v1.ServiceAccount {
-	labels := map[string]string{
-		"launchbox.io/application.id": strconv.Itoa(int(p.Spec.ApplicationId)),
-		"launchbox.io/project.id":     strconv.Itoa(int(p.Spec.ProjectId)),
-	}
-
-	serviceAccount := &v1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      rev.Name,
-			Namespace: rev.Namespace,
-			Labels:    labels,
-		},
-	}
-	ctrl.SetControllerReference(rev, serviceAccount, r.Scheme)
-	return serviceAccount
-}
-
-func (r *RevisionReconciler) serviceForRevision(rev *launchboxiov1alpha1.Revision) *v1.Service {
+func (r *RevisionReconciler) serviceForRevision(rev *launchboxiov1alpha1.Revision, proj *launchboxiov1alpha1.Project) *v1.Service {
 	labels := map[string]string{
 		"launchbox.io/project.id":  rev.Spec.ProjectName,
 		"launchbox.io/revision.id": rev.Name,
 	}
-	//annotations := map[string]string{
-	//	"prometheus.io/scrape": "true",
-	//	"prometheus.io/path":   "/stats/prometheus",
-	//	"prometheus.io/port":   "15000",
-	//}
 	service := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      rev.Name,
@@ -232,11 +177,9 @@ func (r *RevisionReconciler) serviceForRevision(rev *launchboxiov1alpha1.Revisio
 			//Annotations: annotations,
 		},
 		Spec: v1.ServiceSpec{
-			Ports: []v1.ServicePort{{
-				Port: 443,
-				Name: "https",
-			}},
+			Ports: crdPortsToServicePorts(rev.Spec.Ports),
 			Selector: map[string]string{
+				"launchbox.io/project.id":  strconv.Itoa(int(proj.Spec.ProjectId)),
 				"launchbox.io/revision.id": rev.Name,
 			},
 		},
@@ -245,18 +188,19 @@ func (r *RevisionReconciler) serviceForRevision(rev *launchboxiov1alpha1.Revisio
 	return service
 }
 
-func (r *RevisionReconciler) deploymentForRevision(rev *launchboxiov1alpha1.Revision) *appsv1.Deployment {
+func (r *RevisionReconciler) deploymentForRevision(rev *launchboxiov1alpha1.Revision, proj *launchboxiov1alpha1.Project) *appsv1.Deployment {
 	labels := map[string]string{
 		"launchbox.io/project.id":  rev.Spec.ProjectName,
 		"launchbox.io/revision.id": rev.Name,
 	}
 	ports := []v1.ContainerPort{}
 	for _, port := range rev.Spec.Ports {
-		ports = append(ports, v1.ContainerPort{
-			Name:          port.Protocol,
+		containerPort := v1.ContainerPort{
+			Name:          port.Name,
 			ContainerPort: port.Port,
-			Protocol:      protocolMap[port.Protocol],
-		})
+			//Protocol:      protocolMap[port.Protocol],
+		}
+		ports = append(ports, containerPort)
 	}
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -275,6 +219,7 @@ func (r *RevisionReconciler) deploymentForRevision(rev *launchboxiov1alpha1.Revi
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"launchbox.io/revision.id": rev.Name,
+						"launchbox.io/project.id":  strconv.Itoa(int(proj.Spec.ProjectId)),
 					},
 				},
 				Spec: v1.PodSpec{
@@ -284,7 +229,7 @@ func (r *RevisionReconciler) deploymentForRevision(rev *launchboxiov1alpha1.Revi
 						Ports: ports,
 						// TODO: Obviously we're missing a ton here...
 					}},
-					ServiceAccountName: rev.Name,
+					ServiceAccountName: proj.Status.ServiceAccount,
 				},
 			},
 			Strategy:                appsv1.DeploymentStrategy{},
@@ -302,7 +247,6 @@ func (r *RevisionReconciler) deploymentForRevision(rev *launchboxiov1alpha1.Revi
 func (r *RevisionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&launchboxiov1alpha1.Revision{}).
-		Owns(&v1.ServiceAccount{}).
 		Owns(&v1.Service{}).
 		Owns(&appsv1.Deployment{}).
 		Complete(r)

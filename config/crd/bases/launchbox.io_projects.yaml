@@ -42,6 +42,20 @@ spec:
                 description: Foo is an example field of Project. Edit project_types.go
                   to remove/update
                 type: string
+              ingress:
+                properties:
+                  enabled:
+                    type: boolean
+                required:
+                - enabled
+                type: object
+              logs:
+                properties:
+                  enabled:
+                    type: boolean
+                required:
+                - enabled
+                type: object
               metrics:
                 properties:
                   enabled:
@@ -51,25 +65,60 @@ spec:
                 type: object
               name:
                 type: string
+              ports:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    port:
+                      format: int32
+                      type: integer
+                    protocol:
+                      type: string
+                    targetPort:
+                      type: string
+                  required:
+                  - name
+                  - port
+                  type: object
+                type: array
               projectId:
                 type: integer
               repo:
                 type: string
             required:
             - applicationId
-            - metrics
             - projectId
             type: object
           status:
             description: ProjectStatus defines the observed state of Project
             properties:
-              activeRevision:
+              activeRevisions:
+                items:
+                  properties:
+                    replicas:
+                      format: int32
+                      type: integer
+                    revisionId:
+                      type: string
+                    status:
+                      type: string
+                    trafficPercentage:
+                      type: integer
+                  required:
+                  - revisionId
+                  type: object
+                type: array
+              primaryRevision:
                 type: integer
+              rootService:
+                type: string
+              serviceAccount:
+                type: string
               state:
                 type: string
             required:
-            - activeRevision
-            - state
+            - serviceAccount
             type: object
         type: object
     served: true

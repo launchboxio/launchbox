@@ -1,0 +1,15 @@
+kind: IngressBackend
+apiVersion: policy.openservicemesh.io/v1alpha1
+metadata:
+  name: test-project
+  namespace: default
+spec:
+  backends:
+    - name: test-project
+      port:
+        number: 80
+        protocol: http
+  sources:
+    - kind: Service
+      namespace: ingress-nginx
+      name: ingress-nginx-controller

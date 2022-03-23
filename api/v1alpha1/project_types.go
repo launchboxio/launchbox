@@ -27,6 +27,28 @@ type Metrics struct {
 	Enabled bool `json:"enabled"`
 }
 
+type Logs struct {
+	Enabled bool `json:"enabled"`
+}
+
+type Ingress struct {
+	Enabled bool `json:"enabled"`
+}
+
+type Port struct {
+	Protocol   string `json:"protocol,omitempty"`
+	Port       int32  `json:"port"`
+	Name       string `json:"name"`
+	TargetPort string `json:"targetPort,omitempty"`
+}
+
+type ActiveRevisionStatus struct {
+	RevisionId        string `json:"revisionId"`
+	Status            string `json:"status,omitempty"`
+	Replicas          uint32 `json:"replicas,omitempty"`
+	TrafficPercentage uint   `json:"trafficPercentage,omitempty"`
+}
+
 // ProjectSpec defines the desired state of Project
 type ProjectSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -38,13 +60,19 @@ type ProjectSpec struct {
 	Name          string  `json:"name,omitempty"`
 	ProjectId     uint    `json:"projectId"`
 	ApplicationId uint    `json:"applicationId"`
-	Metrics       Metrics `json:"metrics"`
+	Metrics       Metrics `json:"metrics,omitempty"`
+	Logs          Logs    `json:"logs,omitempty"`
+	Ports         []Port  `json:"ports,omitempty"`
+	Ingress       Ingress `json:"ingress,omitempty"`
 }
 
 // ProjectStatus defines the observed state of Project
 type ProjectStatus struct {
-	ActiveRevision uint   `json:"activeRevision"`
-	State          string `json:"state"`
+	ServiceAccount  string                 `json:"serviceAccount"`
+	RootService     string                 `json:"rootService,omitempty"`
+	PrimaryRevision uint                   `json:"primaryRevision,omitempty"`
+	ActiveRevisions []ActiveRevisionStatus `json:"activeRevisions,omitempty"`
+	State           string                 `json:"state,omitempty"`
 }
 
 //+kubebuilder:object:root=true
