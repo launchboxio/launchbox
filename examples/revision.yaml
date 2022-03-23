@@ -2,7 +2,7 @@
 apiVersion: launchbox.io/v1alpha1
 kind: Revision
 metadata:
-  name: test-revision
+  name: test-revision-2
 spec:
   commitSha: abcdefg
   projectName: test-project

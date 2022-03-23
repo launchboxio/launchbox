@@ -35,6 +35,11 @@ spec:
             type: object
           spec:
             properties:
+              autoscaling:
+                properties:
+                  enabled:
+                    type: boolean
+                type: object
               commitSha:
                 type: string
               configMap:

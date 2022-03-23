@@ -18,13 +18,12 @@ package controllers
 
 import (
 	"context"
+	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 )
 
 // ProjectReconciler reconciles a Project object
@@ -60,7 +59,7 @@ func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	// We don't really do anything with the project at this point
+	// TODO: Create the serviceMonitor, which will scrape all the services created for individual revisions
 
 	return ctrl.Result{}, nil
 }

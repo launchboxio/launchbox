@@ -219,11 +219,17 @@ func (r *RevisionReconciler) serviceForRevision(rev *launchboxiov1alpha1.Revisio
 		"launchbox.io/project.id":  rev.Spec.ProjectName,
 		"launchbox.io/revision.id": rev.Name,
 	}
+	//annotations := map[string]string{
+	//	"prometheus.io/scrape": "true",
+	//	"prometheus.io/path":   "/stats/prometheus",
+	//	"prometheus.io/port":   "15000",
+	//}
 	service := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      rev.Name,
 			Namespace: rev.Namespace,
 			Labels:    labels,
+			//Annotations: annotations,
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
