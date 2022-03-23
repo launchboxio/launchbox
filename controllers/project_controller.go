@@ -18,19 +18,12 @@ package controllers
 
 import (
 	"context"
-	v1 "k8s.io/api/core/v1"
+	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"reflect"
-	"strconv"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 )
 
 // ProjectReconciler reconciles a Project object
@@ -65,61 +58,15 @@ func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		out.Error(err, "Failed to get Project")
 		return ctrl.Result{}, err
 	}
-	found := &v1.ServiceAccount{}
-	err = r.Get(ctx, types.NamespacedName{Name: project.Name, Namespace: project.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		sa := r.serviceAccountForProject(project)
-		out.Info("Creating a new Service Account", "ServiceAccount.Namespace", project.Namespace, "ServiceAccount.Name", project.Name)
-		err = r.Create(ctx, sa)
-		if err != nil {
-			out.Error(err, "Failed to create new service account", "ServiceAccount.Namespace", project.Namespace, "ServiceAccount.Name", project.Name)
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		out.Error(err, "Failed to get service account")
-		return ctrl.Result{}, err
-	}
 
-	// TODO: Ensure labels and annotations are up to date
-
-	// TODO: If prometheus.enabled, create the ServiceMonitor
-
-	// Get the serviceAccount.name, and update the status
-	if !reflect.DeepEqual(found.Name, project.Status.ServiceAccount) {
-		project.Status.ServiceAccount = found.Name
-		err := r.Status().Update(ctx, project)
-		if err != nil {
-			out.Error(err, "Failed to update Project status")
-			return ctrl.Result{}, err
-		}
-	}
+	// TODO: Create the serviceMonitor, which will scrape all the services created for individual revisions
 
 	return ctrl.Result{}, nil
-}
-
-func (r *ProjectReconciler) serviceAccountForProject(p *launchboxiov1alpha1.Project) *v1.ServiceAccount {
-	labels := map[string]string{
-		"launchbox.io/application.id": strconv.Itoa(int(p.Spec.ApplicationId)),
-		"launchbox.io/project.id":     strconv.Itoa(int(p.Spec.ProjectId)),
-	}
-
-	serviceAccount := &v1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      p.Name,
-			Namespace: p.Namespace,
-			Labels:    labels,
-		},
-	}
-	// Set Memcached instance as the owner and controller
-	ctrl.SetControllerReference(p, serviceAccount, r.Scheme)
-	return serviceAccount
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ProjectReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&launchboxiov1alpha1.Project{}).
-		Owns(&v1.ServiceAccount{}).
 		Complete(r)
 }

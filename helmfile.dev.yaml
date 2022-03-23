@@ -26,11 +26,68 @@ releases:
       - alertmanager:
           enabled: false
       - prometheus:
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorNamespaceSelector: {}
+            serviceMonitorSelector: {}
+            additionalScrapeConfigs:
+            - job_name: 'kubernetes-pods'
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                  action: keep
+                  regex: true
+                - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                  action: replace
+                  target_label: __metrics_path__
+                  regex: (.+)
+                - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                  action: replace
+                  regex: ([^:]+)(?::\d+)?;(\d+)
+                  replacement: $1:$2
+                  target_label: __address__
+                - source_labels: [__meta_kubernetes_namespace]
+                  action: replace
+                  target_label: source_namespace
+                - source_labels: [__meta_kubernetes_pod_name]
+                  action: replace
+                  target_label: source_pod_name
+                - regex: '(__meta_kubernetes_pod_label_app)'
+                  action: labelmap
+                  replacement: source_service
+                - regex: '(__meta_kubernetes_pod_label_osm_envoy_uid|__meta_kubernetes_pod_label_pod_template_hash|__meta_kubernetes_pod_label_version)'
+                  action: drop
+                - source_labels: [__meta_kubernetes_pod_controller_kind]
+                  action: replace
+                  target_label: source_workload_kind
+                - source_labels: [__meta_kubernetes_pod_controller_name]
+                  action: replace
+                  target_label: source_workload_name
+                - source_labels: [__meta_kubernetes_pod_controller_kind]
+                  action: replace
+                  regex: ^ReplicaSet$
+                  target_label: source_workload_kind
+                  replacement: Deployment
+                - source_labels:
+                    - __meta_kubernetes_pod_controller_kind
+                    - __meta_kubernetes_pod_controller_name
+                  action: replace
+                  regex: ^ReplicaSet;(.*)-[^-]+$
+                  target_label: source_workload_name
           ingress:
             enabled: true
             ingressClassName: nginx
             hosts:
               - prometheus.launchbox.local
+            paths:
+              - /
+      - grafana:
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - grafana.launchbox.local
             paths:
               - /
 
@@ -44,6 +101,8 @@ releases:
       - prometheus:
           enabled: false
       - loki:
+          serviceMonitor:
+            enabled: true
           ingress:
             enabled: true
             ingressClassName: nginx
@@ -52,17 +111,26 @@ releases:
                 paths:
                   - /
 
-  - name: vault
-    namespace: vault
-    chart: hashicorp/vault
-    version: 0.19.0
+  - name: tempo
+    namespace: observability
+    chart: grafana/tempo
+    version: 0.14.2
     values:
-      - ingress:
+      - searchEnabled: true
+      - serviceMonitor:
           enabled: true
-          ingressClassName: nginx
-          hosts:
-            - host: vault.launchbox.local
-              paths: []
+
+#  - name: vault
+#    namespace: vault
+#    chart: hashicorp/vault
+#    version: 0.19.0
+#    values:
+#      - ingress:
+#          enabled: true
+#          ingressClassName: nginx
+#          hosts:
+#            - host: vault.launchbox.local
+#              paths: []
 
   - name: registry
     namespace: default

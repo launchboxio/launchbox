@@ -1,0 +1,6 @@
+apiVersion: launchbox.io/v1alpha1
+kind: Revision
+metadata:
+  name: revision-sample
+spec:
+  # TODO(user): Add fields here

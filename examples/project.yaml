@@ -6,7 +6,7 @@ metadata:
 spec:
   branch: main
   repo: https://github.com/launchboxio/launchbox
-  projectId: 1
-  applicationId: 1
+  projectId: 6
+  applicationId: 21
   metrics:
     enabled: true
