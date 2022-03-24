@@ -24,13 +24,14 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // RevisionSpec defines the desired state of Revision
-type Port struct {
-	Protocol string `json:"protocol,omitempty"`
-	Port     int32  `json:"port"`
-}
 
 type Autoscaling struct {
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled                 bool  `json:"enabled,omitempty"`
+	MaxSize                 int32 `json:"maxSize,omitempty"`
+	MinSize                 int32 `json:"minSize,omitempty"`
+	TargetCpuUtilization    int32 `json:"targetCpuUtilization,omitempty"`
+	TargetMemoryUtilization int32 `json:"targetMemoryUtilization,omitempty"`
+	TargetRequestsPerSecond int32 `json:"targetRequestsPerSecond,omitempty"`
 }
 
 type RevisionSpec struct {
@@ -44,7 +45,6 @@ type RevisionSpec struct {
 
 // RevisionStatus defines the observed state of Revision
 type RevisionStatus struct {
-	ServiceAccount    string `json:"serviceAccount"`
 	Service           string `json:"service"`
 	Deployment        string `json:"deployment"`
 	State             string `json:"state"`

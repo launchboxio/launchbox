@@ -39,6 +39,21 @@ spec:
                 properties:
                   enabled:
                     type: boolean
+                  maxSize:
+                    format: int32
+                    type: integer
+                  minSize:
+                    format: int32
+                    type: integer
+                  targetCpuUtilization:
+                    format: int32
+                    type: integer
+                  targetMemoryUtilization:
+                    format: int32
+                    type: integer
+                  targetRequestsPerSecond:
+                    format: int32
+                    type: integer
                 type: object
               commitSha:
                 type: string
@@ -48,14 +63,18 @@ spec:
                 type: string
               ports:
                 items:
-                  description: RevisionSpec defines the desired state of Revision
                   properties:
+                    name:
+                      type: string
                     port:
                       format: int32
                       type: integer
                     protocol:
                       type: string
+                    targetPort:
+                      type: string
                   required:
+                  - name
                   - port
                   type: object
                 type: array
@@ -74,8 +93,6 @@ spec:
                 type: string
               service:
                 type: string
-              serviceAccount:
-                type: string
               state:
                 type: string
               trafficPercentage:
@@ -83,7 +100,6 @@ spec:
             required:
             - deployment
             - service
-            - serviceAccount
             - state
             type: object
         type: object

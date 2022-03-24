@@ -10,3 +10,6 @@ spec:
   applicationId: 21
   metrics:
     enabled: true
+  ports:
+    - port: 80
+      name: http
