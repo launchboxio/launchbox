@@ -70,7 +70,7 @@ type ProjectSpec struct {
 type ProjectStatus struct {
 	ServiceAccount  string                 `json:"serviceAccount"`
 	RootService     string                 `json:"rootService,omitempty"`
-	PrimaryRevision uint                   `json:"primaryRevision,omitempty"`
+	PrimaryRevision string                 `json:"primaryRevision,omitempty"`
 	ActiveRevisions []ActiveRevisionStatus `json:"activeRevisions,omitempty"`
 	State           string                 `json:"state,omitempty"`
 }

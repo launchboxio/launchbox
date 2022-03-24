@@ -19,6 +19,8 @@ package command
 import (
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	"github.com/launchboxio/launchbox/controllers"
+	policyv1alpha1 "github.com/openservicemesh/osm/pkg/apis/policy/v1alpha1"
+	splitv1alpha4 "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/split/v1alpha4"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -92,6 +94,16 @@ func RunOperator(cmd *cobra.Command, args []string) {
 		Scheme: scheme,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Revision")
+		os.Exit(1)
+	}
+
+	if err = policyv1alpha1.AddToScheme(scheme); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Revision")
+		os.Exit(1)
+	}
+
+	if err = splitv1alpha4.AddToScheme(scheme); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TrafficSplit")
 		os.Exit(1)
 	}
 

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
+	osmv1 "github.com/openservicemesh/osm/pkg/apis/policy/v1alpha1"
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -136,6 +137,22 @@ func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	foundBackend := &osmv1.IngressBackend{}
+	err = r.Get(ctx, types.NamespacedName{Name: project.Name, Namespace: project.Namespace}, foundBackend)
+	if err != nil && errors.IsNotFound(err) {
+		ingress := r.ingressBackendForProject(project)
+		out.Info("Creating a new IngressBackend", "IngressBackend.Namespace", project.Namespace, "IngressBackend.Name", project.Name)
+		err = r.Create(ctx, ingress)
+		if err != nil {
+			out.Error(err, "Failed to create new ingress backend", "IngressBackend.Namespace", project.Namespace, "IngressBackend.Name", project.Name)
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		out.Error(err, "Failed to get ingress backend")
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -146,6 +163,7 @@ func (r *ProjectReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&v1.ServiceAccount{}).
 		Owns(&v1.Service{}).
 		Owns(&v12.Ingress{}).
+		Owns(&osmv1.IngressBackend{}).
 		Complete(r)
 }
 
@@ -224,8 +242,29 @@ func (r *ProjectReconciler) ingressForProject(proj *launchboxiov1alpha1.Project)
 	return ingress
 }
 
-func (r *ProjectReconciler) ingressBackend(proj *launchboxiov1alpha1.Project) *v12.Ingress {
-
+func (r *ProjectReconciler) ingressBackendForProject(proj *launchboxiov1alpha1.Project) *osmv1.IngressBackend {
+	backend := &osmv1.IngressBackend{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      proj.Name,
+			Namespace: proj.Namespace,
+		},
+		Spec: osmv1.IngressBackendSpec{
+			Backends: []osmv1.BackendSpec{{
+				Name: proj.Name,
+				Port: osmv1.PortSpec{
+					Number:   int(proj.Spec.Ports[0].Port),
+					Protocol: "http",
+				},
+			}},
+			Sources: []osmv1.IngressSourceSpec{{
+				Kind:      "Service",
+				Namespace: "ingress-nginx",
+				Name:      "ingress-nginx-controller",
+			}},
+		},
+	}
+	ctrl.SetControllerReference(proj, backend, r.Scheme)
+	return backend
 }
 
 func crdPortsToServicePorts(ports []launchboxiov1alpha1.Port) []v1.ServicePort {

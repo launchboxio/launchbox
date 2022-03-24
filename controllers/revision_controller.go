@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	splitv1alpha4 "github.com/servicemeshinterface/smi-sdk-go/pkg/apis/split/v1alpha4"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -143,24 +144,8 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// TODO: Create required OSM metrics resources
 
-	// TODO: Transition traffic
-	// if first revision
-	// 		set traffic to 100
-	//		update all statuses appropriately
-	// else
-	// 	 	ensure traffic 100 on v-1
-	// 		for each step
-	// 			set new traffic amount / percentage
-	//			wait for specified time
-	//			monitor new service and compare metrics
-	// 			if success
-	//				update statuses
-	//              continue
-	//			else
-	//				revert traffic to 100 on v-1
-	//				set statuses to 'rolled back'
-	//
-
+	// From here, we' re done. All of the traffic shifting, monitoring, promoting, and rollbacks
+	// will occur at the Project level
 	return ctrl.Result{}, nil
 }
 
@@ -249,5 +234,6 @@ func (r *RevisionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&launchboxiov1alpha1.Revision{}).
 		Owns(&v1.Service{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&splitv1alpha4.TrafficSplit{}).
 		Complete(r)
 }
