@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/RichardKnop/machinery/v2 v2.0.11
 	github.com/atrox/haikunatorgo/v2 v2.0.1
+	github.com/boltdb/bolt v1.3.1
 	github.com/buildpacks/pack v0.24.0
 	github.com/centrifugal/centrifuge-go v0.8.2
 	github.com/gin-contrib/cors v1.3.1
@@ -14,6 +15,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/openservicemesh/osm v1.0.0
 	github.com/satori/go.uuid v1.2.0
+	github.com/servicemeshinterface/smi-sdk-go v0.5.0
 	github.com/spf13/cobra v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.3.1
@@ -143,7 +145,6 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20201211074657-223ce5d391b0 // indirect
 	github.com/segmentio/encoding v0.2.19 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/servicemeshinterface/smi-sdk-go v0.5.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/src-d/gcfg v1.4.0 // indirect
