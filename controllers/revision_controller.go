@@ -138,6 +138,7 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			out.Error(err, "Failed to update deployment status")
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	// TODO: If autoscaling.enabled, create the HorizontalPodAutoscaler
