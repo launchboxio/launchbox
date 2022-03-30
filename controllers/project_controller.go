@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"github.com/boltdb/bolt"
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	osmv1 "github.com/openservicemesh/osm/pkg/apis/policy/v1alpha1"
 	v1 "k8s.io/api/core/v1"
@@ -30,7 +31,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"strconv"
 )
 
@@ -38,6 +41,7 @@ import (
 type ProjectReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+	Db     *bolt.DB
 }
 
 //+kubebuilder:rbac:groups=launchbox.io,resources=projects,verbs=get;list;watch;create;update;patch;delete
@@ -54,7 +58,10 @@ type ProjectReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+
 	out := log.FromContext(ctx)
+
+	out.Info("Reconciling resource", "Request", req)
 
 	project := &launchboxiov1alpha1.Project{}
 	err := r.Get(ctx, req.NamespacedName, project)
@@ -161,6 +168,10 @@ func (r *ProjectReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&launchboxiov1alpha1.Project{}).
 		Owns(&v1.ServiceAccount{}).
+		Watches(&source.Kind{Type: &launchboxiov1alpha1.Revision{}}, &handler.EnqueueRequestForOwner{
+			IsController: false,
+			OwnerType:    &launchboxiov1alpha1.Revision{},
+		}).
 		Owns(&v1.Service{}).
 		Owns(&v12.Ingress{}).
 		Owns(&osmv1.IngressBackend{}).

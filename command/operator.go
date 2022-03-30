@@ -17,6 +17,7 @@ limitations under the License.
 package command
 
 import (
+	"github.com/boltdb/bolt"
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	"github.com/launchboxio/launchbox/controllers"
 	policyv1alpha1 "github.com/openservicemesh/osm/pkg/apis/policy/v1alpha1"
@@ -61,6 +62,7 @@ func init() {
 }
 
 func RunOperator(cmd *cobra.Command, args []string) {
+
 	opts := zap.Options{
 		Development: true,
 	}
@@ -81,9 +83,17 @@ func RunOperator(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	db, err := bolt.Open("bolt.db", 0600, nil)
+	if err != nil {
+		setupLog.Error(err, "unable to start database")
+		os.Exit(1)
+	}
+	defer db.Close()
+
 	if err = (&controllers.ProjectReconciler{
 		Client: mgr.GetClient(),
 		Scheme: scheme,
+		Db:     db,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Project")
 		os.Exit(1)
