@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/RichardKnop/machinery/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/launchboxio/launchbox/api"
@@ -14,7 +13,6 @@ type Server struct {
 }
 
 var database *gorm.DB
-var taskServer *machinery.Server
 
 func Run(configFile string) error {
 	// First things first load our config
@@ -35,20 +33,11 @@ func Run(configFile string) error {
 	server := &Server{r: r}
 
 	initServer()
-	ts, err := NewTaskServer(&TaskServerConfig{
-		RedisUrl: config.Redis.Url,
-	})
 
 	if err != nil {
 		panic(err)
 	}
-	taskServer = ts
-	go func() {
-		err := RunWorker(config.Worker.ConsumerTag)
-		if err != nil {
-			panic(err)
-		}
-	}()
+
 	server.initControllers(config)
 
 	err = server.Run()

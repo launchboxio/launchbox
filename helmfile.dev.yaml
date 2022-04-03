@@ -14,9 +14,25 @@ repositories:
   - name: ingress-nginx
     url: https://kubernetes.github.io/ingress-nginx
 
-helmDefaults:
-  kubeContext: minikube
+helmDefaults: {}
+#  kubeContext: minikube
 
+hooks:
+  - events: ["prepare"]
+    showlogs: true
+    command: "kubectl"
+    args:
+      - apply
+      - -f
+      - https://raw.githubusercontent.com/servicemeshinterface/smi-sdk-go/main/crds/split.yaml
+      - -f
+      - https://raw.githubusercontent.com/servicemeshinterface/smi-sdk-go/main/crds/access.yaml
+      - -f
+      - https://raw.githubusercontent.com/servicemeshinterface/smi-sdk-go/main/crds/tcproute.yaml
+      - -f
+      - https://raw.githubusercontent.com/servicemeshinterface/smi-sdk-go/main/crds/udproute.yaml
+      - -f
+      - https://raw.githubusercontent.com/servicemeshinterface/smi-sdk-go/main/crds/httproutegroup.yaml
 
 releases:
   - name: prometheus-operator
@@ -156,6 +172,24 @@ releases:
     chart: osm/osm
     version: 1.0.0
     values: []
+    hooks:
+      - events: [ "prepare" ]
+        showlogs: true
+        command: "kubectl"
+        args:
+          - apply
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/config_meshconfig.yaml
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/config_multicluster_service.yaml
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/policy_egress.yaml
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/policy_ingress_backend.yaml
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/policy_retry.yaml
+          - -f
+          - https://raw.githubusercontent.com/openservicemesh/osm/main/cmd/osm-bootstrap/crds/policy_upstream_traffic_setting.yaml
 
 #  - name: ingress-nginx
 #    namespace: ingress-nginx

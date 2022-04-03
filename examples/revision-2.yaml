@@ -1,0 +1,13 @@
+---
+apiVersion: launchbox.io/v1alpha1
+kind: Revision
+metadata:
+  name: test-revision
+spec:
+  commitSha: abcdefg
+  projectName: test-project
+  configMap: nonexistent
+  image: ealen/echo-server
+  ports:
+    - port: 80
+      name: http

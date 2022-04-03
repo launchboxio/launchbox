@@ -1,12 +1,10 @@
 package server
 
 import (
-	"fmt"
 	haikunator "github.com/atrox/haikunatorgo/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/launchboxio/launchbox/api"
 	"net/http"
-	"strconv"
 )
 
 type Applications struct {
@@ -48,10 +46,6 @@ func (a *Applications) Create(c *gin.Context) {
 	app.Namespace = haiku.Haikunate()
 	database.Create(&app)
 
-	_, err = createNamespaceTask(app.ID)
-	if err != nil {
-		fmt.Println(err)
-	}
 	c.JSON(http.StatusOK, app)
 }
 
@@ -75,10 +69,5 @@ func (a *Applications) Update(c *gin.Context) {
 func (a *Applications) Delete(c *gin.Context) {
 	applicationId := c.Param("applicationId")
 	database.Where("id = ?", applicationId).Delete(&api.Application{})
-	id, _ := strconv.Atoi(applicationId)
-	_, err := deleteNamespaceTask(uint(id))
-	if err != nil {
-		fmt.Println(err)
-	}
 	c.JSON(http.StatusNoContent, gin.H{})
 }

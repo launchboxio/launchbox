@@ -19,8 +19,10 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	launchboxiov1alpha1 "github.com/launchboxio/launchbox/api/v1alpha1"
 	osmv1 "github.com/openservicemesh/osm/pkg/apis/policy/v1alpha1"
+	"github.com/servicemeshinterface/smi-sdk-go/pkg/apis/split/v1alpha4"
 	v1 "k8s.io/api/core/v1"
 	v12 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -28,9 +30,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strconv"
 )
 
@@ -56,6 +60,7 @@ type ProjectReconciler struct {
 func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	out := log.FromContext(ctx)
 
+	out.Info("Reconcile loop for Project", "Project.Namespace", req.Namespace, "Project.Name", req.Name)
 	project := &launchboxiov1alpha1.Project{}
 	err := r.Get(ctx, req.NamespacedName, project)
 	if err != nil {
@@ -155,6 +160,19 @@ func (r *ProjectReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	out.Info("Analyzing revisions", "Count", len(project.Status.ActiveRevisions))
+
+	// TODO: We should lock the project resource, so we don't jack anything up?
+	wasUpdated, res, err := r.manageRevisionTrafficSplits(project, out)
+	// TODO: Unlock
+	if err != nil {
+		out.Error(err, "Failed allocating revision traffic")
+		return res, err
+	}
+	if wasUpdated {
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -167,6 +185,72 @@ func (r *ProjectReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&v12.Ingress{}).
 		Owns(&osmv1.IngressBackend{}).
 		Complete(r)
+}
+
+func (p *ProjectReconciler) manageRevisionTrafficSplits(proj *launchboxiov1alpha1.Project, out logr.Logger) (bool, reconcile.Result, error) {
+	// Easy first case. We have one live revision. Short circuit, set to 100%, and return
+	revisions := proj.Status.ActiveRevisions
+	if len(revisions) == 1 {
+		out.Info("Single active revision found, setting to 100% traffic")
+		revision := revisions[0]
+		revision.TrafficPercentage = 100
+		revision.Status = "primary"
+		return p.ensureTrafficSplit(context.TODO(), proj, []launchboxiov1alpha1.ActiveRevisionStatus{revision})
+	}
+	return false, ctrl.Result{}, nil
+}
+
+func (p *ProjectReconciler) ensureTrafficSplit(ctx context.Context, proj *launchboxiov1alpha1.Project, revs []launchboxiov1alpha1.ActiveRevisionStatus) (bool, reconcile.Result, error) {
+	split := &v1alpha4.TrafficSplit{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      proj.Name,
+			Namespace: proj.Namespace,
+		},
+		Spec: v1alpha4.TrafficSplitSpec{
+			Service:  fmt.Sprintf("%s.%s.svc.cluster.local", proj.Name, proj.Namespace),
+			Backends: []v1alpha4.TrafficSplitBackend{},
+		},
+	}
+	for _, rev := range revs {
+		split.Spec.Backends = append(split.Spec.Backends, v1alpha4.TrafficSplitBackend{
+			Service: rev.RevisionId,
+			Weight:  int(rev.TrafficPercentage),
+		})
+	}
+
+	// Upsert the split
+	foundSplit := &v1alpha4.TrafficSplit{}
+	err := p.Get(ctx, types.NamespacedName{Name: proj.Name, Namespace: proj.Namespace}, foundSplit)
+	if err != nil && errors.IsNotFound(err) {
+		err = p.Create(ctx, split)
+		if err != nil {
+			return true, ctrl.Result{}, err
+		}
+		return true, ctrl.Result{}, nil
+	} else if err != nil {
+		return true, ctrl.Result{}, err
+	}
+
+	// Ensure split is updated
+	if !reflect.DeepEqual(foundSplit.Spec.Backends, split.Spec.Backends) {
+		err := p.Status().Update(ctx, split)
+		if err != nil {
+			return true, ctrl.Result{}, err
+		}
+		return true, ctrl.Result{Requeue: true}, nil
+	}
+
+	// Ensure project is updated
+	if !reflect.DeepEqual(proj.Status.ActiveRevisions, revs) {
+		proj.Status.ActiveRevisions = revs
+		err := p.Status().Update(ctx, proj)
+		if err != nil {
+			return true, ctrl.Result{}, err
+		}
+		return true, ctrl.Result{Requeue: true}, nil
+	}
+
+	return false, ctrl.Result{}, nil
 }
 
 func (p *ProjectReconciler) serviceAccountForProject(proj *launchboxiov1alpha1.Project) *v1.ServiceAccount {

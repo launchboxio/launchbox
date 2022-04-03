@@ -110,7 +110,7 @@ spec:
                   type: object
                 type: array
               primaryRevision:
-                type: integer
+                type: string
               rootService:
                 type: string
               serviceAccount:

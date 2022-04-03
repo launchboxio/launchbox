@@ -146,7 +146,28 @@ func (r *RevisionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	// TODO: Create required OSM metrics resources
 
 	// From here, we' re done. All of the traffic shifting, monitoring, promoting, and rollbacks
-	// will occur at the Project level
+	// will occur at the Project level. We just need to update the Project, and add to the
+	// activeRevisions
+	revisionExists := false
+	for _, projRev := range project.Status.ActiveRevisions {
+		if projRev.RevisionId == revision.Name {
+			revisionExists = true
+		}
+	}
+
+	if !revisionExists {
+		activeRevisions := append(project.Status.ActiveRevisions, launchboxiov1alpha1.ActiveRevisionStatus{
+			RevisionId: revision.Name,
+			Status:     "created",
+		})
+		project.Status.ActiveRevisions = activeRevisions
+		err := r.Status().Update(ctx, project)
+		if err != nil {
+			out.Error(err, "Failed to update project revisions status")
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{Requeue: true}, nil
+	}
 	return ctrl.Result{}, nil
 }
 
