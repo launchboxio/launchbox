@@ -4,6 +4,7 @@ import (
 	"github.com/RichardKnop/machinery/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/launchboxio/launchbox/api"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,20 +36,7 @@ func Run(configFile string) error {
 	server := &Server{r: r}
 
 	initServer()
-	ts, err := NewTaskServer(&TaskServerConfig{
-		RedisUrl: config.Redis.Url,
-	})
 
-	if err != nil {
-		panic(err)
-	}
-	taskServer = ts
-	go func() {
-		err := RunWorker(config.Worker.ConsumerTag)
-		if err != nil {
-			panic(err)
-		}
-	}()
 	server.initControllers(config)
 
 	err = server.Run()
@@ -80,12 +68,16 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) initControllers(config *Config) {
+	vaultClient, _ := vault.NewClient(nil)
 	(&Applications{}).Register(s.r)
 	(&Projects{}).Register(s.r)
 	(&Revisions{}).Register(s.r)
 	(&Logs{}).Register(s.r)
 	(&Metrics{
 		Config: config.Prometheus,
+	}).Register(s.r)
+	(&Secrets{
+		Vault: vaultClient,
 	}).Register(s.r)
 	(&Webhooks{}).Register(s.r)
 }

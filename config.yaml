@@ -22,7 +22,7 @@ loki:
 
 vault:
   enabled: true
-  url: ""
+  url: "http://localhost:8200"
 
 cors:
   allowed_origins:
