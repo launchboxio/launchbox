@@ -1,0 +1,10 @@
+create_table("clusters") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("name", "string")
+	t.Column("token", "string")
+
+    t.Column("last_check_in", "timestamp")
+    t.Column("status", "string")
+
+	t.Timestamps()
+}

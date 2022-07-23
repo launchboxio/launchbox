@@ -1,0 +1,6 @@
+- id: "application.created.success"
+  translation: "Application was successfully created."
+- id: "application.updated.success"
+  translation: "Application was successfully updated."
+- id: "application.destroyed.success"
+  translation: "Application was successfully destroyed."

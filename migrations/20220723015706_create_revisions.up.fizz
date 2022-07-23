@@ -1,0 +1,11 @@
+create_table("revisions") {
+	t.Column("id", "uuid", {primary: true})
+
+	t.Column("status", "string")
+	t.Column("commit_sha", "string")
+
+    t.Column("project_id", "uuid")
+	t.ForeignKey("project_id", {"projects": ["id"]}, {})
+
+	t.Timestamps()
+}

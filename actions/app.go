@@ -1,7 +1,11 @@
 package actions
 
 import (
+	"github.com/gobuffalo/logger"
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
+	"strings"
 
 	"launchbox/locales"
 	"launchbox/models"
@@ -15,6 +19,9 @@ import (
 	i18n "github.com/gobuffalo/mw-i18n/v2"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/unrolled/secure"
+
+	gwa "github.com/gobuffalo/gocraft-work-adapter"
+	"github.com/gomodule/redigo/redis"
 )
 
 // ENV is used to help switch settings based on where the
@@ -44,6 +51,20 @@ func App() *buffalo.App {
 		app = buffalo.New(buffalo.Options{
 			Env:         ENV,
 			SessionName: "_launchbox_session",
+			Worker: gwa.New(gwa.Options{
+				Pool: &redis.Pool{
+					MaxActive: 5,
+					MaxIdle:   5,
+					Wait:      true,
+					Dial: func() (redis.Conn, error) {
+						return redis.Dial("tcp", ":6379")
+					},
+				},
+				Name:           "launchbox",
+				MaxConcurrency: 25,
+			}),
+
+			Logger: JSONLogger(getLogLevel(envy.Get("LOG_LEVEL", "info"))),
 		})
 
 		// Automatically redirect to SSL
@@ -65,6 +86,28 @@ func App() *buffalo.App {
 
 		app.GET("/", HomeHandler)
 
+		//AuthMiddlewares
+		app.Use(SetCurrentUser)
+		app.Use(Authorize)
+
+		//Routes for Auth
+		auth := app.Group("/auth")
+		auth.GET("/", AuthLanding)
+		auth.GET("/new", AuthNew)
+		auth.POST("/", AuthCreate)
+		auth.DELETE("/", AuthDestroy)
+		auth.Middleware.Skip(Authorize, AuthLanding, AuthNew, AuthCreate)
+
+		//Routes for User registration
+		users := app.Group("/users")
+		users.GET("/new", UsersNew)
+		users.POST("/", UsersCreate)
+		users.Middleware.Remove(Authorize)
+
+		app.Resource("/applications", ApplicationsResource{})
+		app.Resource("/projects", ProjectsResource{})
+		app.Resource("/revisions", RevisionsResource{})
+		app.Resource("/clusters", ClustersResource{})
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 
@@ -93,4 +136,27 @@ func forceSSL() buffalo.MiddlewareFunc {
 		SSLRedirect:     ENV == "production",
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	})
+}
+
+func JSONLogger(lvl logger.Level) logger.FieldLogger {
+	l := logrus.New()
+	l.Level = lvl
+	l.SetFormatter(&logrus.JSONFormatter{})
+	l.SetOutput(os.Stdout)
+	return logger.Logrus{FieldLogger: l}
+}
+
+func getLogLevel(logLevel string) logger.Level {
+	switch strings.ToLower(logLevel) {
+	case "error":
+		return logger.ErrorLevel
+	case "fatal":
+		return logger.FatalLevel
+	case "debug":
+		return logger.DebugLevel
+	case "warn":
+		return logger.WarnLevel
+	default:
+		return logger.InfoLevel
+	}
 }

@@ -1,0 +1,17 @@
+<div class="py-4 mb-2">
+  <h3 class="d-inline-block">Project Details</h3>
+
+  <div class="float-end">
+    <%= linkTo(projectsPath(), {class: "btn btn-info"}) { %>
+      Back to all Projects
+    <% } %>
+    <%= linkTo(editProjectPath({ project_id: project.ID }), {class: "btn btn-warning", body: "Edit"}) %>
+    <%= linkTo(projectPath({ project_id: project.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+  </div>
+</div>
+
+
+
+<ul class="list-group mb-2 ">
+
+</ul>

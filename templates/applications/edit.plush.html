@@ -1,0 +1,8 @@
+<div class="py-4 mb-2">
+  <h3 class="d-inline-block">Edit Application</h3>
+</div>
+
+<%= formFor(application, {action: applicationPath({ application_id: application.ID }), method: "PUT"}) { %>
+  <%= partial("applications/form.html") %>
+  <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-warning", "data-confirm": "Are you sure?", body: "Cancel"}) %>
+<% } %>

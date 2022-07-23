@@ -1,0 +1,33 @@
+<div class="py-4 mb-2">
+  <h3 class="d-inline-block">Projects</h3>
+  <div class="float-end">
+    <%= linkTo(newProjectsPath(), {class: "btn btn-primary"}) { %>
+      Create New Project
+    <% } %>
+  </div>
+</div>
+
+<table class="table table-hover table-bordered">
+  <thead class="thead-light">
+    
+    <th>&nbsp;</th>
+  </thead>
+  <tbody>
+    <%= for (project) in projects { %>
+      <tr>
+        
+        <td>
+          <div class="float-end">
+            <%= linkTo(projectPath({ project_id: project.ID }), {class: "btn btn-info", body: "View"}) %>
+            <%= linkTo(editProjectPath({ project_id: project.ID }), {class: "btn btn-warning", body: "Edit"}) %>
+            <%= linkTo(projectPath({ project_id: project.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+          </div>
+        </td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<div class="text-center">
+  <%= paginator(pagination) %>
+</div>

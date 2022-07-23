@@ -1,0 +1,8 @@
+<div class="py-4 mb-2">
+  <h3 class="d-inline-block">New Cluster</h3>
+</div>
+
+<%= formFor(cluster, {action: clustersPath(), method: "POST"}) { %>
+  <%= partial("clusters/form.html") %>
+  <%= linkTo(clustersPath(), {class: "btn btn-warning", "data-confirm": "Are you sure?", body: "Cancel"}) %>
+<% } %>

@@ -1,0 +1,8 @@
+<div class="py-4 mb-2">
+  <h3 class="d-inline-block">Edit Project</h3>
+</div>
+
+<%= formFor(project, {action: projectPath({ project_id: project.ID }), method: "PUT"}) { %>
+  <%= partial("projects/form.html") %>
+  <%= linkTo(projectPath({ project_id: project.ID }), {class: "btn btn-warning", "data-confirm": "Are you sure?", body: "Cancel"}) %>
+<% } %>

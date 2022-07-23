@@ -1,0 +1,10 @@
+create_table("users"){
+    t.Column("id", "uuid", {"primary": true})
+    t.Column("email", "string", {})
+    t.Column("email_verified", "boolean", {"default": false})
+    t.Column("password_hash", "string", {})
+    t.Column("avatar_url", "string")
+    t.Column("name", "string")
+
+    t.Timestamps()
+}

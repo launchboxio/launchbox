@@ -1,0 +1,6 @@
+- id: "revision.created.success"
+  translation: "Revision was successfully created."
+- id: "revision.updated.success"
+  translation: "Revision was successfully updated."
+- id: "revision.destroyed.success"
+  translation: "Revision was successfully destroyed."

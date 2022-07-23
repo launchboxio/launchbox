@@ -1,0 +1,56 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: launchbox
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: launchbox
+
+  #  vault:
+  #    image: vault:latest
+  #    ports:
+  #      - 8200:8200
+  #    environment:
+  #      VAULT_DEV_ROOT_TOKEN_ID: "vault-plaintext-root-token"
+  #    cap_add:
+  #      - IPC_LOCK
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379:6379
+
+  centrifugo:
+    image: centrifugo/centrifugo
+    ports:
+      - 8000:8000
+    volumes:
+      - ./config.json:/centrifugo/config.json
+    command: centrifugo -c config.json --admin
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+#
+#  git-server:
+#    image: jkarlos/git-server-docker
+#    #build: .
+#    restart: always
+#    container_name: git-server
+#    ports:
+#      - "2222:22"
+#    volumes:
+#      - ./data/keys:/git-server/keys
+#      - ./data/repos:/git-server/repos
+
+#  registry:
+#    image: registry:2
+#    ports:
+#      - "5000:5000"
+#    restart: always

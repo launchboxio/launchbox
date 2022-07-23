@@ -1,0 +1,6 @@
+- id: "cluster.created.success"
+  translation: "Cluster was successfully created."
+- id: "cluster.updated.success"
+  translation: "Cluster was successfully updated."
+- id: "cluster.destroyed.success"
+  translation: "Cluster was successfully destroyed."
