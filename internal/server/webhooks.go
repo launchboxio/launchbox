@@ -17,16 +17,6 @@ type WebhookParams struct {
 	BranchFilter string `json:"branch_filter"`
 }
 
-func (w *Webhooks) Register(r *gin.Engine) {
-	group := r.Group("/projects/:projectId/webhooks")
-	group.GET("", w.List)
-	group.GET("/:webhookId", w.Get)
-	group.POST("", w.Create)
-	group.POST("/:webhookToken", w.Receive)
-	group.PUT("/:webhookId", w.Update)
-	group.DELETE("/:webhookId", w.Delete)
-}
-
 func (w *Webhooks) List(c *gin.Context) {
 	var webhooks []api.Webhook
 	database.Where("project_id = ?", c.Param("projectId")).Find(&webhooks)

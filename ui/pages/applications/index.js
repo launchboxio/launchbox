@@ -5,7 +5,7 @@ export default function ApplicationsList({data}) {
       <Grid.Container gap={2}>
           {data.applications.map((item, index) => {
               return (
-                  <Grid xs={12}>
+                  <Grid xs={12} key={item.id}>
                       <Card key={item.id}>
                           <Card.Header>
                               {item.name}

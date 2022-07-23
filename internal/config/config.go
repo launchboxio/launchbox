@@ -1,4 +1,4 @@
-package server
+package config
 
 import (
 	"gopkg.in/yaml.v2"
@@ -58,14 +58,19 @@ type TaskWorker struct {
 	ConsumerTag string `yaml:"consumer_tag"`
 }
 
+type AuthConfig struct {
+	RedirectUri string `yaml:"redirect_uri"`
+}
+
 type Config struct {
-	Database   DatabaseConfig   `yaml:"database,omitempty"`
-	Cors       CorsConfig       `yaml:"cors,omitempty"`
-	Redis      RedisConfig      `yaml:"redis,omitempty"`
-	Centrifugo CentrifugoConfig `yaml:"centrifugo,omitempty"`
-	Prometheus PrometheusConfig `yaml:"prometheus,omitempty"`
-	Loki       LokiConfig       `yaml:"loki,omitempty"`
-	Worker     TaskWorker       `yaml:"worker"`
+	Database   DatabaseConfig        `yaml:"database,omitempty"`
+	Cors       CorsConfig            `yaml:"cors,omitempty"`
+	Redis      RedisConfig           `yaml:"redis,omitempty"`
+	Centrifugo CentrifugoConfig      `yaml:"centrifugo,omitempty"`
+	Prometheus PrometheusConfig      `yaml:"prometheus,omitempty"`
+	Loki       LokiConfig            `yaml:"loki,omitempty"`
+	Worker     TaskWorker            `yaml:"worker"`
+	Auth       map[string]AuthConfig `yaml:"auth"`
 }
 
 func LoadDefaultConfig(filePath string) (*Config, error) {

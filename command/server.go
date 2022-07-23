@@ -1,7 +1,7 @@
 package command
 
 import (
-	server2 "github.com/launchboxio/launchbox/server"
+	"github.com/launchboxio/launchbox/internal/server"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,12 @@ func RunServer(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	err = server2.Run(configFilePath)
+	serv, err := server.New(configFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = serv.Run()
 	if err != nil {
 		panic(err)
 	}

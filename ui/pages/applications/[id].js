@@ -6,12 +6,11 @@ export default function ApplicationView({data}) {
     // const { id } = router.query
     //
     // return <p>Application: {id}</p>
-    console.log(data)
-    let content = <h4>You don't have any projects for this app. <a href={`/projects/new?application_id=${data.application.id}`}>Create one now</a></h4>
+    let content = <h4>You dont have any projects for this app. <a href={`/projects/new?application_id=${data.application.id}`}>Create one now</a></h4>
     if (data.projects.projects.length > 0) {
         content = data.projects.projects.map((item, index) => {
             return (
-                <Grid xs={12}>
+                <Grid xs={12} key={item.id}>
                     <Card key={item.id}>
                         <Card.Header>
                             {item.name}

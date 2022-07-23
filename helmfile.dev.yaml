@@ -13,10 +13,13 @@ repositories:
     url: https://openservicemesh.github.io/osm
   - name: ingress-nginx
     url: https://kubernetes.github.io/ingress-nginx
+  - name: cdf
+    url: https://cdfoundation.github.io/tekton-helm-chart
+  - name: crossplane-stable
+    url: https://charts.crossplane.io/stable
 
 helmDefaults:
   kubeContext: minikube
-
 
 releases:
   - name: prometheus-operator
@@ -155,6 +158,13 @@ releases:
     namespace: osm-system
     chart: osm/osm
     version: 1.0.0
+    values: []
+
+# helm install crossplane --namespace crossplane-system crossplane-stable/crossplane
+  - name: crossplane
+    namespace: crossplane-system
+    chart: crossplane-stable/crossplane
+    versio1.7.1
     values: []
 
 #  - name: ingress-nginx

@@ -1,7 +1,7 @@
 ---
 database:
   # A valid DSN for Postgres https://gorm.io/docs/connecting_to_the_database.html#PostgreSQL
-  dsn: "host=localhost user=launchbox password=password dbname=launchbox port=5432 sslmode=disable"
+  dsn: "host=192.168.1.92 user=postgres password=XwUKjNdVz9 dbname=launchbox port=32756 sslmode=disable"
 
 redis:
   url: ""
@@ -14,15 +14,15 @@ centrifugo:
 
 prometheus:
   enabled: true
-  url: ""
+  url: "https://prometheus.homelab.com"
 
 loki:
   enabled: true
-  url: ""
+  url: "https://loki.homelab.com"
 
 vault:
   enabled: true
-  url: ""
+  url: "https://vault.homelab.com"
 
 cors:
   allowed_origins:

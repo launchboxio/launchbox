@@ -1,0 +1,8 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: launchbox.homelab.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific

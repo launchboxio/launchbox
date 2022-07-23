@@ -1,4 +1,4 @@
-package server
+package revisions
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,27 +9,25 @@ import (
 )
 
 type Revisions struct {
+	database *gorm.DB
 }
 
-func (rev *Revisions) Register(r *gin.Engine) {
-	group := r.Group("/projects/:projectId/revisions")
-	group.GET("", rev.List)
-	group.GET("/:revisionId", rev.Get)
-	group.POST("", rev.Create)
-	group.PUT("/:revisionId", rev.Update)
-	group.DELETE("/:revisionId", rev.Delete)
+func New(database *gorm.DB) *Revisions {
+	return &Revisions{
+		database: database,
+	}
 }
 
 func (rev *Revisions) List(c *gin.Context) {
 	var revisions []api.Revision
-	database.Where("project_Id = ?", c.Param("projectId")).Find(&revisions)
+	rev.database.Where("project_Id = ?", c.Param("projectId")).Find(&revisions)
 	c.JSON(http.StatusOK, gin.H{"revisions": &revisions})
 }
 
 func (rev *Revisions) Get(c *gin.Context) {
 	id := c.Param("revisionId")
 	var revision api.Revision
-	database.First(&revision, id)
+	rev.database.First(&revision, id)
 	c.JSON(http.StatusOK, revision)
 }
 
@@ -43,7 +41,7 @@ func (rev *Revisions) Create(c *gin.Context) {
 	}
 	revision.Status = api.RevisionStatusDeploying
 
-	err = database.Transaction(func(tx *gorm.DB) error {
+	err = rev.database.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&revision).Error; err != nil {
 			return err
 		}
@@ -69,6 +67,6 @@ func (rev *Revisions) Update(c *gin.Context) {
 }
 
 func (rev *Revisions) Delete(c *gin.Context) {
-	database.Where("id = ?", c.Param("revisionId")).Delete(&api.Revision{})
+	rev.database.Where("id = ?", c.Param("revisionId")).Delete(&api.Revision{})
 	c.JSON(http.StatusNoContent, gin.H{})
 }
