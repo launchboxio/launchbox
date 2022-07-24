@@ -120,6 +120,11 @@ func App() *buffalo.App {
 		auth := app.Group("/auth")
 		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
 		auth.GET("/{provider}/callback", AuthCallback)
+
+		app.GET("/logs", LogsQuery)
+		app.GET("/metrics", MetricsQuery)
+		app.GET("/traces", TracesQuery)
+
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 
