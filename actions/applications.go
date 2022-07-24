@@ -2,7 +2,10 @@ package actions
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
@@ -31,6 +34,8 @@ type ApplicationsResource struct {
 // List gets all Applications. This function is mapped to the path
 // GET /applications
 func (v ApplicationsResource) List(c buffalo.Context) error {
+	user := c.Value("current_user").(*models.User)
+
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -44,7 +49,7 @@ func (v ApplicationsResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Applications from the DB
-	if err := q.All(applications); err != nil {
+	if err := q.Where("user_id = ?", user.ID).All(applications); err != nil {
 		return err
 	}
 
@@ -64,23 +69,9 @@ func (v ApplicationsResource) List(c buffalo.Context) error {
 // Show gets the data for one Application. This function is mapped to
 // the path GET /applications/{application_id}
 func (v ApplicationsResource) Show(c buffalo.Context) error {
-	// Get the DB connection from the context
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return fmt.Errorf("no transaction found")
-	}
-
-	// Allocate an empty Application
-	application := &models.Application{}
-
-	// To find the Application the parameter application_id is used.
-	if err := tx.Find(application, c.Param("application_id")); err != nil {
-		return c.Error(http.StatusNotFound, err)
-	}
+	application := c.Value("application")
 
 	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("application", application)
-
 		return c.Render(http.StatusOK, r.HTML("applications/show.plush.html"))
 	}).Wants("json", func(c buffalo.Context) error {
 		return c.Render(200, r.JSON(application))
@@ -100,13 +91,20 @@ func (v ApplicationsResource) New(c buffalo.Context) error {
 // Create adds a Application to the DB. This function is mapped to the
 // path POST /applications
 func (v ApplicationsResource) Create(c buffalo.Context) error {
+	user := c.Value("current_user").(*models.User)
+
 	// Allocate an empty Application
-	application := &models.Application{}
+	application := &models.Application{
+		User: user,
+	}
 
 	// Bind application to the html form elements
 	if err := c.Bind(application); err != nil {
 		return err
 	}
+
+	// TODO: Validate the actual existence of application.Name. For some reason,
+	// even an empty name will pass validation
 
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -257,5 +255,41 @@ func (v ApplicationsResource) Destroy(c buffalo.Context) error {
 		return c.Render(http.StatusOK, r.JSON(application))
 	}).Wants("xml", func(c buffalo.Context) error {
 		return c.Render(http.StatusOK, r.XML(application))
+	}).Respond(c)
+}
+
+func SetCurrentApplication(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		uid := c.Session().Get("current_user_id")
+		if uid == nil {
+			return applicationNotFoundResponse(c)
+		}
+
+		tx := c.Value("tx").(*pop.Connection)
+		applications := []models.Application{}
+
+		// To find the Application the parameter application_id is used.
+		if err := tx.Where("user_id = ?", uid).Where("id = ?", c.Param("application_id")).Eager().All(&applications); err != nil {
+			log.Println(err)
+			return applicationNotFoundResponse(c)
+		}
+
+		if len(applications) == 0 {
+			return applicationNotFoundResponse(c)
+		}
+
+		c.Set("application", applications[0])
+
+		return next(c)
+	}
+}
+
+func applicationNotFoundResponse(c buffalo.Context) error {
+	return responder.Wants("html", func(c buffalo.Context) error {
+		c.Flash().Add("error", T.Translate(c, "application.find.error"))
+
+		return c.Redirect(302, "/applications")
+	}).Wants("json", func(c buffalo.Context) error {
+		return c.Error(http.StatusNotFound, errors.New("Application not found"))
 	}).Respond(c)
 }

@@ -2,10 +2,12 @@ create_table("projects") {
 	t.Column("id", "uuid", {primary: true})
 
 	t.Column("name", "string")
-	t.Column("status", "string")
+	t.Column("status", "string", {"null": true})
 
     t.Column("application_id", "uuid")
 	t.ForeignKey("application_id", {"applications": ["id"]}, {})
 
 	t.Timestamps()
 }
+
+add_index("projects", ["application_id", "name"], {"unique": true})

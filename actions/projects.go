@@ -101,7 +101,10 @@ func (v ProjectsResource) New(c buffalo.Context) error {
 // path POST /projects
 func (v ProjectsResource) Create(c buffalo.Context) error {
 	// Allocate an empty Project
-	project := &models.Project{}
+	application := c.Value("application").(models.Application)
+	project := &models.Project{
+		Application: &application,
+	}
 
 	// Bind project to the html form elements
 	if err := c.Bind(project); err != nil {

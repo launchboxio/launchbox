@@ -1,11 +1,12 @@
 package actions
 
 import (
-	"github.com/gobuffalo/logger"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gobuffalo/logger"
+	"github.com/sirupsen/logrus"
 
 	"launchbox/locales"
 	"launchbox/models"
@@ -22,6 +23,8 @@ import (
 
 	gwa "github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gomodule/redigo/redis"
+
+	"github.com/markbates/goth/gothic"
 )
 
 // ENV is used to help switch settings based on where the
@@ -64,7 +67,7 @@ func App() *buffalo.App {
 				MaxConcurrency: 25,
 			}),
 
-			Logger: JSONLogger(getLogLevel(envy.Get("LOG_LEVEL", "info"))),
+			Logger: JSONLogger(getLogLevel(envy.Get("LOG_LEVEL", "debug"))),
 		})
 
 		// Automatically redirect to SSL
@@ -90,13 +93,13 @@ func App() *buffalo.App {
 		app.Use(SetCurrentUser)
 		app.Use(Authorize)
 
-		//Routes for Auth
-		auth := app.Group("/auth")
-		auth.GET("/", AuthLanding)
-		auth.GET("/new", AuthNew)
-		auth.POST("/", AuthCreate)
-		auth.DELETE("/", AuthDestroy)
-		auth.Middleware.Skip(Authorize, AuthLanding, AuthNew, AuthCreate)
+		////Routes for Auth
+		//auth := app.Group("/auth")
+		//auth.GET("/", AuthLanding)
+		//auth.GET("/new", AuthNew)
+		//auth.POST("/", AuthCreate)
+		//auth.DELETE("/", AuthDestroy)
+		//auth.Middleware.Skip(Authorize, AuthLanding, AuthNew, AuthCreate)
 
 		//Routes for User registration
 		users := app.Group("/users")
@@ -104,10 +107,19 @@ func App() *buffalo.App {
 		users.POST("/", UsersCreate)
 		users.Middleware.Remove(Authorize)
 
-		app.Resource("/applications", ApplicationsResource{})
-		app.Resource("/projects", ProjectsResource{})
-		app.Resource("/revisions", RevisionsResource{})
+		apps := ApplicationsResource{}
+		wr := app.Resource("/applications", apps)
+		wr.Resource("projects", ProjectsResource{}).Middleware.Use(SetCurrentApplication)
+		wr.Resource("revisions", RevisionsResource{}).Middleware.Use(SetCurrentApplication)
+
+		wr.Middleware.Use(SetCurrentApplication)
+		wr.Middleware.Skip(SetCurrentApplication, apps.List, apps.Create)
+
 		app.Resource("/clusters", ClustersResource{})
+
+		auth := app.Group("/auth")
+		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
+		auth.GET("/{provider}/callback", AuthCallback)
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 

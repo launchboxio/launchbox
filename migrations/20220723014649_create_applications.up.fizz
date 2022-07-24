@@ -8,3 +8,6 @@ create_table("applications") {
 
 	t.Timestamps()
 }
+
+add_index("applications", "namespace", {"unique": true})
+add_index("applications", ["name", "user_id"], {"unique": true})

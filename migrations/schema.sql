@@ -44,7 +44,7 @@ CREATE TABLE public.clusters (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
     token character varying(255) NOT NULL,
-    last_check_in timestamp without time zone NOT NULL,
+    last_check_in timestamp without time zone,
     status character varying(255) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -60,7 +60,7 @@ ALTER TABLE public.clusters OWNER TO launchbox;
 CREATE TABLE public.projects (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
-    status character varying(255) NOT NULL,
+    status character varying(255),
     application_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -75,8 +75,8 @@ ALTER TABLE public.projects OWNER TO launchbox;
 
 CREATE TABLE public.revisions (
     id uuid NOT NULL,
-    status character varying(255) NOT NULL,
-    commit_sha character varying(255) NOT NULL,
+    status character varying(255),
+    commit_sha character varying(255),
     project_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -105,8 +105,8 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     email_verified boolean DEFAULT false NOT NULL,
     password_hash character varying(255) NOT NULL,
-    avatar_url character varying(255) NOT NULL,
-    name character varying(255) NOT NULL,
+    avatar_url character varying(255),
+    name character varying(255),
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );
@@ -152,6 +152,41 @@ ALTER TABLE ONLY public.revisions
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: applications_name_user_id_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX applications_name_user_id_idx ON public.applications USING btree (name, user_id);
+
+
+--
+-- Name: applications_namespace_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX applications_namespace_idx ON public.applications USING btree (namespace);
+
+
+--
+-- Name: clusters_name_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX clusters_name_idx ON public.clusters USING btree (name);
+
+
+--
+-- Name: clusters_token_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX clusters_token_idx ON public.clusters USING btree (token);
+
+
+--
+-- Name: projects_application_id_name_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX projects_application_id_name_idx ON public.projects USING btree (application_id, name);
 
 
 --

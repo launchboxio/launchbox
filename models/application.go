@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/yelinaung/go-haikunator"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gofrs/uuid"
@@ -12,6 +14,11 @@ import (
 // Application is used by pop to map your applications database table to your go code.
 type Application struct {
 	ID uuid.UUID `json:"id" db:"id"`
+
+	Name      string `json:"name" db:"name" form:"name"`
+	Namespace string `json:"namespace" db:"namespace"`
+
+	Projects []Project `json:"projects,omitempty" has_many:"projects"`
 
 	UserID    uuid.UUID `json:"-" db:"user_id"`
 	User      *User     `json:"tree,omitempty" belongs_to:"user"`
@@ -32,6 +39,15 @@ type Applications []Application
 func (a Applications) String() string {
 	ja, _ := json.Marshal(a)
 	return string(ja)
+}
+
+func (a *Application) BeforeCreate(tx *pop.Connection) error {
+	// TODO: We should add a suffix for additional variations
+	if a.Namespace == "" {
+		gen := haikunator.New(time.Now().UTC().UnixNano())
+		a.Namespace = gen.Haikunate()
+	}
+	return nil
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

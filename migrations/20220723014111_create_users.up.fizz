@@ -3,8 +3,8 @@ create_table("users"){
     t.Column("email", "string", {})
     t.Column("email_verified", "boolean", {"default": false})
     t.Column("password_hash", "string", {})
-    t.Column("avatar_url", "string")
-    t.Column("name", "string")
+    t.Column("avatar_url", "string", {"null": true})
+    t.Column("name", "string", {"null": true})
 
     t.Timestamps()
 }

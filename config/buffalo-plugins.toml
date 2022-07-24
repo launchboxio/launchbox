@@ -3,5 +3,9 @@
   go_get = "github.com/gobuffalo/buffalo-auth@latest"
 
 [[plugin]]
+  binary = "buffalo-goth"
+  go_get = "github.com/gobuffalo/buffalo-goth@latest"
+
+[[plugin]]
   binary = "buffalo-pop"
   go_get = "github.com/gobuffalo/buffalo-pop/v3@latest"

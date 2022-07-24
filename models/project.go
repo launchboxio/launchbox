@@ -12,11 +12,11 @@ import (
 // Project is used by pop to map your projects database table to your go code.
 type Project struct {
 	ID     uuid.UUID `json:"id" db:"id"`
-	Name   string    `json:"name"`
-	Status string    `json:"status"`
+	Name   string    `json:"name" db:"name" form:"name"`
+	Status string    `json:"status" db:"status"`
 
-	ApplicationID uuid.UUID   `json:"application_id"`
-	Application   Application `json:"application,omitempty" belongs_to:"application"`
+	ApplicationID uuid.UUID    `json:"application_id" db:"application_id"`
+	Application   *Application `json:"application,omitempty" belongs_to:"application"`
 
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`

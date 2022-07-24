@@ -11,7 +11,17 @@
 </div>
 
 
-
+<%= if (len(application.Projects) == 0) { %>
+<div class="alert alert-warning">
+  No projects for this application yet. Create one now!
+</div>
+<% } %>
 <ul class="list-group mb-2 ">
-
+  <%= for (project) in application.Projects { %>
+  <li><%= project.Name %></li>
+  <% } %>
 </ul>
+
+<%= linkTo([application, "projects/new"], {class: "btn"}) { %>
+Create project
+<% } %>
