@@ -10,4 +10,3 @@ import (
 func TracesQuery(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.HTML("traces/query.html"))
 }
-

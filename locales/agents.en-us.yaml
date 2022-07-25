@@ -1,0 +1,6 @@
+- id: "agent.created.success"
+  translation: "Agent was successfully created."
+- id: "agent.updated.success"
+  translation: "Agent was successfully updated."
+- id: "agent.destroyed.success"
+  translation: "Agent was successfully destroyed."

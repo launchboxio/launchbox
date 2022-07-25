@@ -10,4 +10,3 @@ import (
 func MetricsQuery(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.HTML("metrics/query.html"))
 }
-

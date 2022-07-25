@@ -19,6 +19,7 @@ type Application struct {
 	Namespace string `json:"namespace" db:"namespace"`
 
 	Projects []Project `json:"projects,omitempty" has_many:"projects"`
+	Clusters []Cluster `json:"clusters" many_to_many:"cluster_applications" db:"-"`
 
 	UserID    uuid.UUID `json:"-" db:"user_id"`
 	User      *User     `json:"tree,omitempty" belongs_to:"user"`

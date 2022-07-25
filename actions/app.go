@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/gobuffalo/logger"
 	"github.com/sirupsen/logrus"
 
@@ -115,16 +117,23 @@ func App() *buffalo.App {
 		wr.Middleware.Use(SetCurrentApplication)
 		wr.Middleware.Skip(SetCurrentApplication, apps.List, apps.Create)
 
-		app.Resource("/clusters", ClustersResource{})
+		cr := app.Resource("/clusters", ClustersResource{})
+		cr.Resource("/agents", AgentsResource{})
 
 		auth := app.Group("/auth")
 		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
 		auth.GET("/{provider}/callback", AuthCallback)
 
 		app.GET("/logs", LogsQuery)
-		app.GET("/metrics", MetricsQuery)
+		app.GET("/series", MetricsQuery)
 		app.GET("/traces", TracesQuery)
 
+		// TODO: This should be restricted to value of --metrics.bind-address
+		metrics := app.Group("/metrics")
+		metrics.GET("/", buffalo.WrapHandler(promhttp.Handler()))
+		metrics.Middleware.Clear()
+
+		app.Resource("/agents", AgentsResource{})
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 

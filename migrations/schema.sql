@@ -21,6 +21,24 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: agents; Type: TABLE; Schema: public; Owner: launchbox
+--
+
+CREATE TABLE public.agents (
+    id uuid NOT NULL,
+    pod_name character varying(255) DEFAULT 'null'::character varying,
+    ip_address character varying(255) DEFAULT 'null'::character varying,
+    status character varying(255) DEFAULT 'connecting'::character varying NOT NULL,
+    cluster_id uuid NOT NULL,
+    last_check_in timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.agents OWNER TO launchbox;
+
+--
 -- Name: applications; Type: TABLE; Schema: public; Owner: launchbox
 --
 
@@ -37,6 +55,21 @@ CREATE TABLE public.applications (
 ALTER TABLE public.applications OWNER TO launchbox;
 
 --
+-- Name: cluster_applications; Type: TABLE; Schema: public; Owner: launchbox
+--
+
+CREATE TABLE public.cluster_applications (
+    cluster_id integer NOT NULL,
+    application_id integer NOT NULL,
+    status character varying(255) DEFAULT 'pending'::character varying NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.cluster_applications OWNER TO launchbox;
+
+--
 -- Name: clusters; Type: TABLE; Schema: public; Owner: launchbox
 --
 
@@ -44,8 +77,10 @@ CREATE TABLE public.clusters (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
     token character varying(255) NOT NULL,
+    owner_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+    owner_type character varying(255) DEFAULT 'user'::character varying NOT NULL,
     last_check_in timestamp without time zone,
-    status character varying(255) NOT NULL,
+    status character varying(255),
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );
@@ -115,11 +150,27 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO launchbox;
 
 --
+-- Name: agents agents_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT agents_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: applications applications_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
 --
 
 ALTER TABLE ONLY public.applications
     ADD CONSTRAINT applications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cluster_applications cluster_applications_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.cluster_applications
+    ADD CONSTRAINT cluster_applications_pkey PRIMARY KEY (cluster_id, application_id);
 
 
 --
@@ -169,10 +220,10 @@ CREATE UNIQUE INDEX applications_namespace_idx ON public.applications USING btre
 
 
 --
--- Name: clusters_name_idx; Type: INDEX; Schema: public; Owner: launchbox
+-- Name: clusters_name_owner_id_idx; Type: INDEX; Schema: public; Owner: launchbox
 --
 
-CREATE UNIQUE INDEX clusters_name_idx ON public.clusters USING btree (name);
+CREATE UNIQUE INDEX clusters_name_owner_id_idx ON public.clusters USING btree (name, owner_id);
 
 
 --
@@ -194,6 +245,14 @@ CREATE UNIQUE INDEX projects_application_id_name_idx ON public.projects USING bt
 --
 
 CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USING btree (version);
+
+
+--
+-- Name: agents agents_cluster_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.agents
+    ADD CONSTRAINT agents_cluster_id_fkey FOREIGN KEY (cluster_id) REFERENCES public.clusters(id);
 
 
 --

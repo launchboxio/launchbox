@@ -1,0 +1,7 @@
+create_table("cluster_applications") {
+  t.Column("cluster_id", "integer", {})
+  t.Column("application_id", "integer", {})
+  t.Column("status", "string", {default: "pending"})
+  t.Timestamps()
+  t.PrimaryKey("cluster_id", "application_id")
+}

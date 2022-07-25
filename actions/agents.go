@@ -17,35 +17,34 @@ import (
 // edit this file.
 
 // Following naming logic is implemented in Buffalo:
-// Model: Singular (Cluster)
-// DB Table: Plural (clusters)
-// Resource: Plural (Clusters)
-// Path: Plural (/clusters)
-// View Template Folder: Plural (/templates/clusters/)
+// Model: Singular (Agent)
+// DB Table: Plural (agents)
+// Resource: Plural (Agents)
+// Path: Plural (/agents)
+// View Template Folder: Plural (/templates/agents/)
 
-// ClustersResource is the resource for the Cluster model
-type ClustersResource struct {
+// AgentsResource is the resource for the Agent model
+type AgentsResource struct {
 	buffalo.Resource
 }
 
-// List gets all Clusters. This function is mapped to the path
-// GET /clusters
-func (v ClustersResource) List(c buffalo.Context) error {
-
+// List gets all Agents. This function is mapped to the path
+// GET /agents
+func (v AgentsResource) List(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return fmt.Errorf("no transaction found")
 	}
 
-	clusters := &models.Clusters{}
+	agents := &models.Agents{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
 
-	// Retrieve all Clusters from the DB
-	if err := q.Where("owner_id = ?", c.Value("current_user").(*models.User).ID).All(clusters); err != nil {
+	// Retrieve all Agents from the DB
+	if err := q.All(agents); err != nil {
 		return err
 	}
 
@@ -53,63 +52,59 @@ func (v ClustersResource) List(c buffalo.Context) error {
 		// Add the paginator to the context so it can be used in the template.
 		c.Set("pagination", q.Paginator)
 
-		c.Set("clusters", clusters)
-		return c.Render(http.StatusOK, r.HTML("clusters/index.plush.html"))
+		c.Set("agents", agents)
+		return c.Render(http.StatusOK, r.HTML("agents/index.plush.html"))
 	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(clusters))
+		return c.Render(200, r.JSON(agents))
 	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(clusters))
+		return c.Render(200, r.XML(agents))
 	}).Respond(c)
 }
 
-// Show gets the data for one Cluster. This function is mapped to
-// the path GET /clusters/{cluster_id}
-func (v ClustersResource) Show(c buffalo.Context) error {
+// Show gets the data for one Agent. This function is mapped to
+// the path GET /agents/{agent_id}
+func (v AgentsResource) Show(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return fmt.Errorf("no transaction found")
 	}
 
-	// Allocate an empty Cluster
-	cluster := &models.Cluster{}
+	// Allocate an empty Agent
+	agent := &models.Agent{}
 
-	// To find the Cluster the parameter cluster_id is used.
-	if err := tx.Find(cluster, c.Param("cluster_id")); err != nil {
+	// To find the Agent the parameter agent_id is used.
+	if err := tx.Find(agent, c.Param("agent_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
 	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("cluster", cluster)
+		c.Set("agent", agent)
 
-		return c.Render(http.StatusOK, r.HTML("clusters/show.plush.html"))
+		return c.Render(http.StatusOK, r.HTML("agents/show.plush.html"))
 	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(cluster))
+		return c.Render(200, r.JSON(agent))
 	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(cluster))
+		return c.Render(200, r.XML(agent))
 	}).Respond(c)
 }
 
-// New renders the form for creating a new Cluster.
-// This function is mapped to the path GET /clusters/new
-func (v ClustersResource) New(c buffalo.Context) error {
-	c.Set("cluster", &models.Cluster{})
+// New renders the form for creating a new Agent.
+// This function is mapped to the path GET /agents/new
+func (v AgentsResource) New(c buffalo.Context) error {
+	c.Set("agent", &models.Agent{})
 
-	return c.Render(http.StatusOK, r.HTML("clusters/new.plush.html"))
+	return c.Render(http.StatusOK, r.HTML("agents/new.plush.html"))
 }
 
-// Create adds a Cluster to the DB. This function is mapped to the
-// path POST /clusters
-func (v ClustersResource) Create(c buffalo.Context) error {
-	user := c.Value("current_user").(*models.User)
+// Create adds a Agent to the DB. This function is mapped to the
+// path POST /agents
+func (v AgentsResource) Create(c buffalo.Context) error {
+	// Allocate an empty Agent
+	agent := &models.Agent{}
 
-	// Allocate an empty Cluster
-	cluster := &models.Cluster{
-		OwnerId: user.ID,
-	}
-
-	// Bind cluster to the html form elements
-	if err := c.Bind(cluster); err != nil {
+	// Bind agent to the html form elements
+	if err := c.Bind(agent); err != nil {
 		return err
 	}
 
@@ -120,7 +115,7 @@ func (v ClustersResource) Create(c buffalo.Context) error {
 	}
 
 	// Validate the data from the html form
-	verrs, err := tx.ValidateAndCreate(cluster)
+	verrs, err := tx.ValidateAndCreate(agent)
 	if err != nil {
 		return err
 	}
@@ -132,9 +127,9 @@ func (v ClustersResource) Create(c buffalo.Context) error {
 
 			// Render again the new.html template that the user can
 			// correct the input.
-			c.Set("cluster", cluster)
+			c.Set("agent", agent)
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("clusters/new.plush.html"))
+			return c.Render(http.StatusUnprocessableEntity, r.HTML("agents/new.plush.html"))
 		}).Wants("json", func(c buffalo.Context) error {
 			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 		}).Wants("xml", func(c buffalo.Context) error {
@@ -144,59 +139,59 @@ func (v ClustersResource) Create(c buffalo.Context) error {
 
 	return responder.Wants("html", func(c buffalo.Context) error {
 		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "cluster.created.success"))
+		c.Flash().Add("success", T.Translate(c, "agent.created.success"))
 
 		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/clusters/%v", cluster.ID)
+		return c.Redirect(http.StatusSeeOther, "/agents/%v", agent.ID)
 	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(cluster))
+		return c.Render(http.StatusCreated, r.JSON(agent))
 	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(cluster))
+		return c.Render(http.StatusCreated, r.XML(agent))
 	}).Respond(c)
 }
 
-// Edit renders a edit form for a Cluster. This function is
-// mapped to the path GET /clusters/{cluster_id}/edit
-func (v ClustersResource) Edit(c buffalo.Context) error {
+// Edit renders a edit form for a Agent. This function is
+// mapped to the path GET /agents/{agent_id}/edit
+func (v AgentsResource) Edit(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return fmt.Errorf("no transaction found")
 	}
 
-	// Allocate an empty Cluster
-	cluster := &models.Cluster{}
+	// Allocate an empty Agent
+	agent := &models.Agent{}
 
-	if err := tx.Find(cluster, c.Param("cluster_id")); err != nil {
+	if err := tx.Find(agent, c.Param("agent_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	c.Set("cluster", cluster)
-	return c.Render(http.StatusOK, r.HTML("clusters/edit.plush.html"))
+	c.Set("agent", agent)
+	return c.Render(http.StatusOK, r.HTML("agents/edit.plush.html"))
 }
 
-// Update changes a Cluster in the DB. This function is mapped to
-// the path PUT /clusters/{cluster_id}
-func (v ClustersResource) Update(c buffalo.Context) error {
+// Update changes a Agent in the DB. This function is mapped to
+// the path PUT /agents/{agent_id}
+func (v AgentsResource) Update(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return fmt.Errorf("no transaction found")
 	}
 
-	// Allocate an empty Cluster
-	cluster := &models.Cluster{}
+	// Allocate an empty Agent
+	agent := &models.Agent{}
 
-	if err := tx.Find(cluster, c.Param("cluster_id")); err != nil {
+	if err := tx.Find(agent, c.Param("agent_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	// Bind Cluster to the html form elements
-	if err := c.Bind(cluster); err != nil {
+	// Bind Agent to the html form elements
+	if err := c.Bind(agent); err != nil {
 		return err
 	}
 
-	verrs, err := tx.ValidateAndUpdate(cluster)
+	verrs, err := tx.ValidateAndUpdate(agent)
 	if err != nil {
 		return err
 	}
@@ -208,9 +203,9 @@ func (v ClustersResource) Update(c buffalo.Context) error {
 
 			// Render again the edit.html template that the user can
 			// correct the input.
-			c.Set("cluster", cluster)
+			c.Set("agent", agent)
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("clusters/edit.plush.html"))
+			return c.Render(http.StatusUnprocessableEntity, r.HTML("agents/edit.plush.html"))
 		}).Wants("json", func(c buffalo.Context) error {
 			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 		}).Wants("xml", func(c buffalo.Context) error {
@@ -220,47 +215,47 @@ func (v ClustersResource) Update(c buffalo.Context) error {
 
 	return responder.Wants("html", func(c buffalo.Context) error {
 		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "cluster.updated.success"))
+		c.Flash().Add("success", T.Translate(c, "agent.updated.success"))
 
 		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/clusters/%v", cluster.ID)
+		return c.Redirect(http.StatusSeeOther, "/agents/%v", agent.ID)
 	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(cluster))
+		return c.Render(http.StatusOK, r.JSON(agent))
 	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(cluster))
+		return c.Render(http.StatusOK, r.XML(agent))
 	}).Respond(c)
 }
 
-// Destroy deletes a Cluster from the DB. This function is mapped
-// to the path DELETE /clusters/{cluster_id}
-func (v ClustersResource) Destroy(c buffalo.Context) error {
+// Destroy deletes a Agent from the DB. This function is mapped
+// to the path DELETE /agents/{agent_id}
+func (v AgentsResource) Destroy(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return fmt.Errorf("no transaction found")
 	}
 
-	// Allocate an empty Cluster
-	cluster := &models.Cluster{}
+	// Allocate an empty Agent
+	agent := &models.Agent{}
 
-	// To find the Cluster the parameter cluster_id is used.
-	if err := tx.Find(cluster, c.Param("cluster_id")); err != nil {
+	// To find the Agent the parameter agent_id is used.
+	if err := tx.Find(agent, c.Param("agent_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	if err := tx.Destroy(cluster); err != nil {
+	if err := tx.Destroy(agent); err != nil {
 		return err
 	}
 
 	return responder.Wants("html", func(c buffalo.Context) error {
 		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "cluster.destroyed.success"))
+		c.Flash().Add("success", T.Translate(c, "agent.destroyed.success"))
 
 		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/clusters")
+		return c.Redirect(http.StatusSeeOther, "/agents")
 	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(cluster))
+		return c.Render(http.StatusOK, r.JSON(agent))
 	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(cluster))
+		return c.Render(http.StatusOK, r.XML(agent))
 	}).Respond(c)
 }

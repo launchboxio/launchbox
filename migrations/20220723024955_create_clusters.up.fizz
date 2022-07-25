@@ -3,11 +3,13 @@ create_table("clusters") {
 	t.Column("name", "string")
 	t.Column("token", "string")
 
+    t.Column("owner_id", "uuid", {"null": true, "default": "00000000-0000-0000-0000-000000000000"})
+    t.Column("owner_type", "string", {"default": "user"})
     t.Column("last_check_in", "timestamp", {"null": true})
-    t.Column("status", "string")
+    t.Column("status", "string", {"null": true})
 
 	t.Timestamps()
 }
 
-add_index("clusters", "name", {"unique": true})
+add_index("clusters", ["name", "owner_id"], {"unique": true})
 add_index("clusters", "token", {"unique": true})
