@@ -1,33 +1,32 @@
-<div class="py-4 mb-2">
-  <h3 class="d-inline-block">AccessTokens</h3>
-  <div class="float-end">
-    <%= linkTo(newAccessTokensPath(), {class: "btn btn-primary"}) { %>
-      Create New AccessToken
-    <% } %>
-  </div>
-</div>
+<h4 class="fw-bold py-3 mb-4">
+  <span class="text-muted fw-light">Account Settings / </span> Access Tokens
+</h4>
 
-<table class="table table-hover table-bordered">
-  <thead class="thead-light">
-    
-    <th>&nbsp;</th>
-  </thead>
-  <tbody>
-    <%= for (accessToken) in accessTokens { %>
-      <tr>
-        
-        <td>
-          <div class="float-end">
-            <%= linkTo(accessTokenPath({ access_token_id: accessToken.ID }), {class: "btn btn-info", body: "View"}) %>
-            <%= linkTo(editAccessTokenPath({ access_token_id: accessToken.ID }), {class: "btn btn-warning", body: "Edit"}) %>
-            <%= linkTo(accessTokenPath({ access_token_id: accessToken.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+<div class="row">
+  <div class="col-12 mb-md-0 mb-4">
+    <div class="card">
+      <h5 class="card-header">Access Tokens</h5>
+      <div class="card-body">
+        <p>Manage access tokens that can access your projects</p>
+        <%= if (len(accessTokens) == 0) { %>
+        <p>You don't have any access tokens yet! <a href="/access_tokens/new">Click here to create one</a></p>
+        <% } %>
+        <%= for (token) in accessTokens { %>
+        <div class="d-flex mb-3">
+          <div class="flex-grow-1 row">
+            <div class="col-9 mb-sm-0 mb-2">
+              <h6 class="mb-0">Google</h6>
+              <small class="text-muted">Calendar and contacts</small>
+            </div>
+            <div class="col-3 text-end">
+              <div class="form-check form-switch">
+                <input class="form-check-input float-end" type="checkbox" role="switch" />
+              </div>
+            </div>
           </div>
-        </td>
-      </tr>
-    <% } %>
-  </tbody>
-</table>
-
-<div class="text-center">
-  <%= paginator(pagination) %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
 </div>

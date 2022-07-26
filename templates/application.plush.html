@@ -8,19 +8,36 @@
     <meta name="csrf-param" content="authenticity_token" />
     <meta name="csrf-token" content="<%= authenticity_token %>" />
     <link rel="icon" href="<%= assetPath("images/favicon.ico") %>">
+    <%= javascriptTag("helpers.js") %>
+
   </head>
   <body>
 
-    <div class="container-fluid">
-      <div class="row flex-nowrap">
+    <%= if (current_user) { %>
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
         <%= partial("sidebar.plush.html") %>
-        <div class="col py-3">
-          <%= partial("flash.html") %>
-          <%= yield %>
+        <div class="layout-page">
+          <%= partial("navbar.plush.html") %>
+          <div class="content-wrapper">
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <%= partial("flash.html") %>
+              <%= yield %>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <% } else { %>
+    <div class="container-xxl">
+      <%= partial("flash.html") %>
+      <%= yield %>
+    </div>
+    <% } %>
 
     <%= javascriptTag("application.js") %>
+    <%= javascriptTag("menu.js") %>
+    <%= javascriptTag("main.js") %>
+    <%= javascriptTag("dashboard-analytics.js") %>
   </body>
 </html>

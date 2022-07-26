@@ -1,3 +1,78 @@
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
+
+<div class="card">
+  <h5 class="card-header">Managed Clusters</h5>
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Provider</th>
+        <th>Region</th>
+        <th>Version</th>
+      </tr>
+      </thead>
+      <tbody class="table-border-bottom-0">
+      <%= for (cluster) in clusters { %>
+        <%= if (cluster.Managed) { %>
+          <tr>
+            <td><strong><%= cluster.Name %></strong></td>
+            <td><%= cluster.Provider %></td>
+            <td><%= cluster.Region %></td>
+            <td><%= cluster.Version %></td>
+          </tr>
+        <% } %>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr class="my-5" />
+
+<div class="card">
+  <h5 class="card-header">Custom Clusters</h5>
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Provider</th>
+        <th>Region</th>
+        <th>Version</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody class="table-border-bottom-0">
+      <%= for (cluster) in clusters { %>
+      <%= if (!cluster.Managed) { %>
+      <tr>
+        <td><%= cluster.Name %></td>
+        <td><%= cluster.Provider %></td>
+        <td><%= cluster.Region %></td>
+        <td><%= cluster.Version %></td>
+        <td>
+
+          <div class="btn-group" role="group" aria-label="Second group">
+            <a href="<%= pathFor(clusterPath({ cluster_id: cluster.ID })) %>" type="button" class="btn btn-outline-secondary">
+              <i class="tf-icons bx bx-bold"></i>
+            </a>
+            <a href="<%= pathFor(editClusterPath({ cluster_id: cluster.ID })) %>" type="button" class="btn btn-outline-secondary">
+              <i class="tf-icons bx bx-italic"></i>
+            </a>
+            <a href="<%= pathFor(clusterPath({ cluster_id: cluster.ID })) %>" type="button" class="btn btn-outline-secondary">
+              <i class="tf-icons bx bx-underline"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      <% } %>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
 <div class="py-4 mb-2">
   <h3 class="d-inline-block">Clusters</h3>
   <div class="float-end">
@@ -6,55 +81,3 @@
     <% } %>
   </div>
 </div>
-
-<h4>Managed Clusters</h4>
-<table class="table table-hover table-bordered">
-  <thead class="thead-light">
-    <th>Name</th>
-    <th>Provider</th>
-    <th>Region</th>
-    <th>Version</th>
-  </thead>
-  <tbody>
-    <%= for (cluster) in clusters { %>
-      <%= if (cluster.Managed) { %>
-      <tr>
-        <td><%= cluster.Name %></td>
-        <td><%= cluster.Provider %></td>
-        <td><%= cluster.Region %></td>
-        <td><%= cluster.Version %></td>
-      </tr>
-      <% } %>
-    <% } %>
-  </tbody>
-</table>
-
-<h4>Custom Clusters</h4>
-<table class="table table-hover table-bordered">
-  <thead class="thead-light">
-  <th>Name</th>
-  <th>Provider</th>
-  <th>Region</th>
-  <th>Version</th>
-  <th>&nbsp;</th>
-  </thead>
-  <tbody>
-  <%= for (cluster) in clusters { %>
-  <%= if (!cluster.Managed) { %>
-  <tr>
-    <td><%= cluster.Name %></td>
-    <td><%= cluster.Provider %></td>
-    <td><%= cluster.Region %></td>
-    <td><%= cluster.Version %></td>
-    <td>
-      <div class="float-end">
-        <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-info", body: "View"}) %>
-        <%= linkTo(editClusterPath({ cluster_id: cluster.ID }), {class: "btn btn-warning", body: "Edit"}) %>
-        <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
-      </div>
-    </td>
-  </tr>
-  <% } %>
-  <% } %>
-  </tbody>
-</table>

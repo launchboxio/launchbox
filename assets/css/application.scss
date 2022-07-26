@@ -1,4 +1,13 @@
-@import "~bootstrap/scss/bootstrap.scss";
+@import '_bootstrap-extended/include';
+
+@import "bootstrap/scss/bootstrap.scss";
 @import "~@fortawesome/fontawesome-free/css/all.min.css";
 
 @import "buffalo";
+@import "bootstrap-extended";
+@import "colors";
+@import "components";
+@import "theme-default";
+
+@import "demo.css";
+@import "page-auth.css";
