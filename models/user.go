@@ -23,8 +23,6 @@ type User struct {
 
 	Password             string `json:"-" db:"-"`
 	PasswordConfirmation string `json:"-" db:"-"`
-
-	Applications []Application `json:"applications,omitempty" has_many:"applications"`
 }
 
 // Create wraps up the pattern of encrypting the password and

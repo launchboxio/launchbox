@@ -1,6 +1,33 @@
 <div class="form-group">
     <label for="name">Name</label>
-    <input type="text" class="form-control" id="name" name="name">
+    <input type="text" class="form-control" id="name" name="name" value="<%= cluster.Name %>">
+</div>
+
+<div class="form-group">
+    <label for="region">Region</label>
+    <input type="text" class="form-control" id="region" name="region" value="<%= cluster.Region %>">
+</div>
+
+<div class="form-group">
+    <label for="provider">Provider</label>
+    <select class="form-control" name="provider" id="provider" value="<%= cluster.Provider %>">
+        <option value="">Select a provider...</option>
+        <option value="aws">AWS</option>
+        <option value="gcp">Google Cloud</option>
+        <option value="aks">Azure</option>
+        <option value="do">Digital Ocean</option>
+        <option value="other">Other</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="version">Version</label>
+    <select class="form-control" name="version" id="version" value="<%= cluster.Version %>">
+        <option value="">Choose a supported version...</option>
+        <option value="1.22">1.22</option>
+        <option value="1.23">1.23</option>
+        <option value="1.24">1.24</option>
+    </select>
 </div>
 
 <button class="btn btn-success" role="submit">Save</button>

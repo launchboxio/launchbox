@@ -11,12 +11,19 @@ import (
 
 // Cluster is used by pop to map your clusters database table to your go code.
 type Cluster struct {
-	ID    uuid.UUID `json:"id" db:"id"`
-	Name  string    `json:"name" db:"name" form:"name"`
-	Token string    `json:"-" db:"token"`
+	ID       uuid.UUID `json:"id" db:"id"`
+	Name     string    `json:"name" db:"name" form:"name"`
+	Provider string    `json:"provider" db:"provider" form:"provider"`
+	Region   string    `json:"region" db:"region" form:"region"`
+	Version  string    `json:"version" db:"version" form:"version"`
+	Token    string    `json:"-" db:"token"`
+
+	Agents       []Agent       `json:"agents,omitempty" has_many:"agents"`
+	Applications []Application `json:"applications,omitempty" many_to_many:"cluster_applications"`
 
 	OwnerId   uuid.UUID `json:"owner_id" db:"owner_id"`
 	OwnerType string    `json:"owner_type" db:"owner_type"`
+	Managed   bool      `json:"managed" db:"-"`
 
 	LastCheckIn time.Time `json:"last_check_in" db:"last_check_in"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
@@ -40,6 +47,15 @@ func (c *Cluster) BeforeCreate(tx *pop.Connection) error {
 		}
 
 		c.Token = token.String()
+	}
+	return nil
+}
+
+func (c *Cluster) AfterFind(tx *pop.Connection) error {
+	if c.OwnerId.String() == "00000000-0000-0000-0000-000000000000" {
+		c.Managed = true
+	} else {
+		c.Managed = false
 	}
 	return nil
 }

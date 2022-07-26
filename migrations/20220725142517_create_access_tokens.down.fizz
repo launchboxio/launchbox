@@ -1,0 +1,1 @@
+drop_table("access_tokens")

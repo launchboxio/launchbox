@@ -2,7 +2,6 @@ package actions
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -256,32 +255,6 @@ func (v ApplicationsResource) Destroy(c buffalo.Context) error {
 	}).Wants("xml", func(c buffalo.Context) error {
 		return c.Render(http.StatusOK, r.XML(application))
 	}).Respond(c)
-}
-
-func SetCurrentApplication(next buffalo.Handler) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		uid := c.Session().Get("current_user_id")
-		if uid == nil {
-			return applicationNotFoundResponse(c)
-		}
-
-		tx := c.Value("tx").(*pop.Connection)
-		applications := []models.Application{}
-
-		// To find the Application the parameter application_id is used.
-		if err := tx.Where("user_id = ?", uid).Where("id = ?", c.Param("application_id")).Eager().All(&applications); err != nil {
-			log.Println(err)
-			return applicationNotFoundResponse(c)
-		}
-
-		if len(applications) == 0 {
-			return applicationNotFoundResponse(c)
-		}
-
-		c.Set("application", applications[0])
-
-		return next(c)
-	}
 }
 
 func applicationNotFoundResponse(c buffalo.Context) error {

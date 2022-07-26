@@ -11,9 +11,14 @@
   </head>
   <body>
 
-    <div class="container">
-      <%= partial("flash.html") %>
-      <%= yield %>
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        <%= partial("sidebar.plush.html") %>
+        <div class="col py-3">
+          <%= partial("flash.html") %>
+          <%= yield %>
+        </div>
+      </div>
     </div>
 
     <%= javascriptTag("application.js") %>

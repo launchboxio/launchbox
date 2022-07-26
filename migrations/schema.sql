@@ -21,6 +21,23 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: access_tokens; Type: TABLE; Schema: public; Owner: launchbox
+--
+
+CREATE TABLE public.access_tokens (
+    id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    token uuid NOT NULL,
+    principal character varying(255) NOT NULL,
+    scopes character varying(255) NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.access_tokens OWNER TO launchbox;
+
+--
 -- Name: agents; Type: TABLE; Schema: public; Owner: launchbox
 --
 
@@ -28,7 +45,7 @@ CREATE TABLE public.agents (
     id uuid NOT NULL,
     pod_name character varying(255) DEFAULT 'null'::character varying,
     ip_address character varying(255) DEFAULT 'null'::character varying,
-    status character varying(255) DEFAULT 'connecting'::character varying NOT NULL,
+    status character varying(255) DEFAULT 'pending'::character varying NOT NULL,
     cluster_id uuid NOT NULL,
     last_check_in timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
@@ -59,8 +76,8 @@ ALTER TABLE public.applications OWNER TO launchbox;
 --
 
 CREATE TABLE public.cluster_applications (
-    cluster_id integer NOT NULL,
-    application_id integer NOT NULL,
+    cluster_id uuid NOT NULL,
+    application_id uuid NOT NULL,
     status character varying(255) DEFAULT 'pending'::character varying NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -77,6 +94,9 @@ CREATE TABLE public.clusters (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
     token character varying(255) NOT NULL,
+    provider character varying(255) DEFAULT 'null'::character varying,
+    region character varying(255) DEFAULT 'null'::character varying,
+    version character varying(255) DEFAULT 'null'::character varying,
     owner_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
     owner_type character varying(255) DEFAULT 'user'::character varying NOT NULL,
     last_check_in timestamp without time zone,
@@ -150,6 +170,37 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO launchbox;
 
 --
+-- Name: vcs_connections; Type: TABLE; Schema: public; Owner: launchbox
+--
+
+CREATE TABLE public.vcs_connections (
+    id uuid NOT NULL,
+    provider character varying(255) NOT NULL,
+    hostname character varying(255) DEFAULT 'null'::character varying,
+    name character varying(255) DEFAULT 'null'::character varying,
+    email character varying(255) NOT NULL,
+    nickname character varying(255) DEFAULT 'null'::character varying,
+    provider_user_id character varying(255) DEFAULT 'null'::character varying,
+    access_token character varying(255) DEFAULT 'null'::character varying,
+    expires_at timestamp without time zone,
+    refresh_token character varying(255) DEFAULT 'null'::character varying,
+    user_id uuid NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.vcs_connections OWNER TO launchbox;
+
+--
+-- Name: access_tokens access_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.access_tokens
+    ADD CONSTRAINT access_tokens_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: agents agents_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
 --
 
@@ -206,6 +257,21 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: vcs_connections vcs_connections_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.vcs_connections
+    ADD CONSTRAINT vcs_connections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: access_tokens_token_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX access_tokens_token_idx ON public.access_tokens USING btree (token);
+
+
+--
 -- Name: applications_name_user_id_idx; Type: INDEX; Schema: public; Owner: launchbox
 --
 
@@ -248,6 +314,13 @@ CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USIN
 
 
 --
+-- Name: vcs_connections_provider_user_id_idx; Type: INDEX; Schema: public; Owner: launchbox
+--
+
+CREATE UNIQUE INDEX vcs_connections_provider_user_id_idx ON public.vcs_connections USING btree (provider, user_id);
+
+
+--
 -- Name: agents agents_cluster_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: launchbox
 --
 
@@ -277,6 +350,14 @@ ALTER TABLE ONLY public.projects
 
 ALTER TABLE ONLY public.revisions
     ADD CONSTRAINT revisions_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: vcs_connections vcs_connections_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.vcs_connections
+    ADD CONSTRAINT vcs_connections_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --

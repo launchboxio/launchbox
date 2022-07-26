@@ -40,19 +40,12 @@ func (v ClustersResource) List(c buffalo.Context) error {
 
 	clusters := &models.Clusters{}
 
-	// Paginate results. Params "page" and "per_page" control pagination.
-	// Default values are "page=1" and "per_page=20".
-	q := tx.PaginateFromParams(c.Params())
-
 	// Retrieve all Clusters from the DB
-	if err := q.Where("owner_id = ?", c.Value("current_user").(*models.User).ID).All(clusters); err != nil {
+	if err := tx.Where("owner_id in (?, ?)", "00000000-0000-0000-0000-000000000000", c.Value("current_user").(*models.User).ID).All(clusters); err != nil {
 		return err
 	}
 
 	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
-
 		c.Set("clusters", clusters)
 		return c.Render(http.StatusOK, r.HTML("clusters/index.plush.html"))
 	}).Wants("json", func(c buffalo.Context) error {
@@ -75,7 +68,9 @@ func (v ClustersResource) Show(c buffalo.Context) error {
 	cluster := &models.Cluster{}
 
 	// To find the Cluster the parameter cluster_id is used.
-	if err := tx.Find(cluster, c.Param("cluster_id")); err != nil {
+	if err := tx.
+		Where("owner_id = ?", c.Value("current_user").(*models.User).ID).
+		Where("id = ?", c.Param("cluster_id")).EagerPreload("Agents").First(cluster); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -105,7 +100,8 @@ func (v ClustersResource) Create(c buffalo.Context) error {
 
 	// Allocate an empty Cluster
 	cluster := &models.Cluster{
-		OwnerId: user.ID,
+		OwnerId:   user.ID,
+		OwnerType: "user",
 	}
 
 	// Bind cluster to the html form elements

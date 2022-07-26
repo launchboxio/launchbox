@@ -1,0 +1,13 @@
+create_table("access_tokens") {
+	t.Column("id", "uuid", {primary: true})
+
+	t.Column("name", "string")
+	t.Column("token", "uuid")
+
+	t.Column("principal", "string")
+	t.Column("scopes", "string")
+
+	t.Timestamps()
+}
+
+add_index("access_tokens", "token", {"unique": true})

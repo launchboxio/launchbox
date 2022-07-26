@@ -1,0 +1,20 @@
+create_table("vcs_connections") {
+	t.Column("id", "uuid", {primary: true})
+
+    t.Column("provider", "string")
+	t.Column("hostname", "string", {"null": true, "default": "null"})
+	t.Column("name", "string", {"null": true, "default": "null"})
+	t.Column("email", "string")
+	t.Column("nickname", "string", {"null": true, "default": "null"})
+	t.Column("provider_user_id", "string", {"null": true, "default": "null"})
+	t.Column("access_token", "string", {"null": true, "default": "null"})
+	t.Column("expires_at", "timestamp", {"null": true})
+	t.Column("refresh_token", "string", {"null": true, "default": "null"})
+
+    t.Column("user_id", "uuid")
+    t.ForeignKey("user_id", {"users": ["id"]}, {})
+
+	t.Timestamps()
+}
+
+add_index("vcs_connections", ["provider", "user_id"], {"unique": true})

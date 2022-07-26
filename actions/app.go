@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/markbates/goth/gothic"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gobuffalo/logger"
@@ -26,7 +28,7 @@ import (
 	gwa "github.com/gobuffalo/gocraft-work-adapter"
 	"github.com/gomodule/redigo/redis"
 
-	"github.com/markbates/goth/gothic"
+	mw "launchbox/pkg/middleware"
 )
 
 // ENV is used to help switch settings based on where the
@@ -92,37 +94,25 @@ func App() *buffalo.App {
 		app.GET("/", HomeHandler)
 
 		//AuthMiddlewares
-		app.Use(SetCurrentUser)
-		app.Use(Authorize)
-
-		////Routes for Auth
-		//auth := app.Group("/auth")
-		//auth.GET("/", AuthLanding)
-		//auth.GET("/new", AuthNew)
-		//auth.POST("/", AuthCreate)
-		//auth.DELETE("/", AuthDestroy)
-		//auth.Middleware.Skip(Authorize, AuthLanding, AuthNew, AuthCreate)
+		app.Use(mw.SetCurrentUser)
+		app.Use(mw.Authorize)
 
 		//Routes for User registration
 		users := app.Group("/users")
 		users.GET("/new", UsersNew)
 		users.POST("/", UsersCreate)
-		users.Middleware.Remove(Authorize)
+		users.Middleware.Remove(mw.Authorize)
 
 		apps := ApplicationsResource{}
 		wr := app.Resource("/applications", apps)
-		wr.Resource("projects", ProjectsResource{}).Middleware.Use(SetCurrentApplication)
-		wr.Resource("revisions", RevisionsResource{}).Middleware.Use(SetCurrentApplication)
+		wr.Resource("projects", ProjectsResource{}).Middleware.Use(mw.SetCurrentApplication)
+		wr.Resource("revisions", RevisionsResource{}).Middleware.Use(mw.SetCurrentApplication)
 
-		wr.Middleware.Use(SetCurrentApplication)
-		wr.Middleware.Skip(SetCurrentApplication, apps.List, apps.Create)
+		wr.Middleware.Use(mw.SetCurrentApplication)
+		wr.Middleware.Skip(mw.SetCurrentApplication, apps.List, apps.Create)
 
 		cr := app.Resource("/clusters", ClustersResource{})
 		cr.Resource("/agents", AgentsResource{})
-
-		auth := app.Group("/auth")
-		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
-		auth.GET("/{provider}/callback", AuthCallback)
 
 		app.GET("/logs", LogsQuery)
 		app.GET("/series", MetricsQuery)
@@ -134,6 +124,22 @@ func App() *buffalo.App {
 		metrics.Middleware.Clear()
 
 		app.Resource("/agents", AgentsResource{})
+		app.Resource("/access_tokens", AccessTokensResource{})
+
+		auth := app.Group("/auth")
+		auth.GET("/", AuthLanding)
+		auth.GET("/new", AuthNew)
+		auth.POST("/", AuthCreate)
+		auth.DELETE("/", AuthDestroy)
+		auth.GET("/{provider}", buffalo.WrapHandlerFunc(gothic.BeginAuthHandler))
+		auth.GET("/{provider}/callback", AuthCallback)
+		auth.Middleware.Skip(mw.Authorize, AuthLanding, AuthNew, AuthCreate)
+
+		//AuthMiddlewares
+		app.Use(mw.SetCurrentUser)
+		app.Use(mw.Authorize)
+
+		app.GET("/settings", SettingsIndex)
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 

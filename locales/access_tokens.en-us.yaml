@@ -1,0 +1,6 @@
+- id: "access_token.created.success"
+  translation: "AccessToken was successfully created."
+- id: "access_token.updated.success"
+  translation: "AccessToken was successfully updated."
+- id: "access_token.destroyed.success"
+  translation: "AccessToken was successfully destroyed."

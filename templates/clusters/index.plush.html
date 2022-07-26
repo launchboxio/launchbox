@@ -7,27 +7,54 @@
   </div>
 </div>
 
+<h4>Managed Clusters</h4>
 <table class="table table-hover table-bordered">
   <thead class="thead-light">
     <th>Name</th>
-    <th>&nbsp;</th>
+    <th>Provider</th>
+    <th>Region</th>
+    <th>Version</th>
   </thead>
   <tbody>
     <%= for (cluster) in clusters { %>
+      <%= if (cluster.Managed) { %>
       <tr>
         <td><%= cluster.Name %></td>
-        <td>
-          <div class="float-end">
-            <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-info", body: "View"}) %>
-            <%= linkTo(editClusterPath({ cluster_id: cluster.ID }), {class: "btn btn-warning", body: "Edit"}) %>
-            <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
-          </div>
-        </td>
+        <td><%= cluster.Provider %></td>
+        <td><%= cluster.Region %></td>
+        <td><%= cluster.Version %></td>
       </tr>
+      <% } %>
     <% } %>
   </tbody>
 </table>
 
-<div class="text-center">
-  <%= paginator(pagination) %>
-</div>
+<h4>Custom Clusters</h4>
+<table class="table table-hover table-bordered">
+  <thead class="thead-light">
+  <th>Name</th>
+  <th>Provider</th>
+  <th>Region</th>
+  <th>Version</th>
+  <th>&nbsp;</th>
+  </thead>
+  <tbody>
+  <%= for (cluster) in clusters { %>
+  <%= if (!cluster.Managed) { %>
+  <tr>
+    <td><%= cluster.Name %></td>
+    <td><%= cluster.Provider %></td>
+    <td><%= cluster.Region %></td>
+    <td><%= cluster.Version %></td>
+    <td>
+      <div class="float-end">
+        <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-info", body: "View"}) %>
+        <%= linkTo(editClusterPath({ cluster_id: cluster.ID }), {class: "btn btn-warning", body: "Edit"}) %>
+        <%= linkTo(clusterPath({ cluster_id: cluster.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+      </div>
+    </td>
+  </tr>
+  <% } %>
+  <% } %>
+  </tbody>
+</table>

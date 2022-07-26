@@ -3,7 +3,7 @@ create_table("agents") {
 
     t.Column("pod_name", "string", {"default": "null", "null": true})
     t.Column("ip_address", "string", {"default": "null", "null": true})
-    t.Column("status", "string", {"default": "connecting"})
+    t.Column("status", "string", {"default": "pending"})
 
 	t.Column("cluster_id", "uuid")
 	t.ForeignKey("cluster_id", {"clusters": ["id"]}, {})

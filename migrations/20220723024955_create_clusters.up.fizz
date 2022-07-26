@@ -2,6 +2,9 @@ create_table("clusters") {
 	t.Column("id", "uuid", {primary: true})
 	t.Column("name", "string")
 	t.Column("token", "string")
+	t.Column("provider", "string", {"null": true, "default": "null"})
+	t.Column("region", "string", {"null": true, "default": "null"})
+	t.Column("version", "string", {"null": true, "default": "null"})
 
     t.Column("owner_id", "uuid", {"null": true, "default": "00000000-0000-0000-0000-000000000000"})
     t.Column("owner_type", "string", {"default": "user"})
