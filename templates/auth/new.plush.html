@@ -5,7 +5,7 @@
       <div class="card-body">
         <!-- Logo -->
         <div class="app-brand justify-content-center">
-          <a href="index.html" class="app-brand-link gap-2">
+          <a href="/" class="app-brand-link gap-2">
               <span class="app-brand-logo demo">
                 <svg
                         width="25"
@@ -68,33 +68,33 @@
         <h4 class="mb-2">Welcome to Sneat! 👋</h4>
         <p class="mb-4">Please sign-in to your account and start the adventure</p>
 
-        <form id="formAuthentication" class="mb-3" action="index.html" method="POST">
+        <%= formFor(user, {action: authPath(), method: "POST"}) { %>
           <div class="mb-3">
-            <label for="email" class="form-label">Email or Username</label>
+            <label for="email" class="form-label">Email</label>
             <input
-                    type="text"
-                    class="form-control"
-                    id="email"
-                    name="email-username"
-                    placeholder="Enter your email or username"
-                    autofocus
+              type="text"
+              class="form-control"
+              id="email"
+              name="Email"
+              placeholder="Enter your email"
+              autofocus
             />
           </div>
           <div class="mb-3 form-password-toggle">
             <div class="d-flex justify-content-between">
               <label class="form-label" for="password">Password</label>
-              <a href="auth-forgot-password-basic.html">
+              <a href="#">
                 <small>Forgot Password?</small>
               </a>
             </div>
             <div class="input-group input-group-merge">
               <input
-                      type="password"
-                      id="password"
-                      class="form-control"
-                      name="password"
-                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                      aria-describedby="password"
+                type="password"
+                id="password"
+                class="form-control"
+                name="Password"
+                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                aria-describedby="password"
               />
               <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
             </div>
@@ -108,11 +108,11 @@
           <div class="mb-3">
             <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
           </div>
-        </form>
+        <% } %>
 
         <p class="text-center">
           <span>New on our platform?</span>
-          <a href="auth-register-basic.html">
+          <a href="/users/new">
             <span>Create an account</span>
           </a>
         </p>
@@ -121,15 +121,3 @@
     <!-- /Register -->
   </div>
 </div>
-
-<!--<div class="auth-wrapper">-->
-<!--  <div class="sign-form">-->
-<!--    <h1>Sign In</h1>-->
-
-<!--    <%= formFor(user, {action: authPath(), method: "POST"}) { %>-->
-<!--      <%= f.InputTag("Email") %>-->
-<!--      <%= f.InputTag("Password", {type: "password"}) %>-->
-<!--      <button class="btn btn-success">Sign In!</button>-->
-<!--    <% } %>-->
-<!--  </div>-->
-<!--</div>-->

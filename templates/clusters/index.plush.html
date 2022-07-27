@@ -1,4 +1,4 @@
-<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tables /</span> Basic Tables</h4>
+<h4 class="fw-bold py-3 mb-4">Clusters</h4>
 
 <div class="card">
   <h5 class="card-header">Managed Clusters</h5>
@@ -34,6 +34,11 @@
   <h5 class="card-header">Custom Clusters</h5>
   <div class="table-responsive text-nowrap">
     <table class="table">
+      <caption class="ms-4">
+        <%= linkTo(newClustersPath()) { %>
+        Create New Cluster
+        <% } %>
+      </caption>
       <thead>
       <tr>
         <th>Name</th>
@@ -73,11 +78,4 @@
   </div>
 </div>
 
-<div class="py-4 mb-2">
-  <h3 class="d-inline-block">Clusters</h3>
-  <div class="float-end">
-    <%= linkTo(newClustersPath(), {class: "btn btn-primary"}) { %>
-      Create New Cluster
-    <% } %>
-  </div>
-</div>
+

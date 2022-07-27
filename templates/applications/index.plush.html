@@ -1,33 +1,36 @@
-<div class="py-4 mb-2">
-  <h3 class="d-inline-block">Applications</h3>
-  <div class="float-end">
-    <%= linkTo(newApplicationsPath(), {class: "btn btn-primary"}) { %>
-      Create New Application
-    <% } %>
+<h4 class="fw-bold py-3 mb-4">Applications</h4>
+
+<div class="card">
+  <div class="table-responsive text-nowrap">
+    <table class="table">
+      <caption class="ms-4">
+        <%= linkTo(newApplicationsPath()) { %>
+          Create New Application
+        <% } %>
+      </caption>
+      <thead class="thead-light">
+        <th>Name</th>
+        <th>&nbsp;</th>
+      </thead>
+      <tbody>
+        <%= for (application) in applications { %>
+          <tr>
+            <td><%= application.Name %></td>
+            <td>
+              <div class="float-end">
+                <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-info", body: "View"}) %>
+                <%= linkTo(editApplicationPath({ application_id: application.ID }), {class: "btn btn-warning", body: "Edit"}) %>
+                <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+              </div>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <div class="text-center">
+      <%= paginator(pagination) %>
+    </div>
   </div>
 </div>
 
-<table class="table table-hover table-bordered">
-  <thead class="thead-light">
-    <th>Name</th>
-    <th>&nbsp;</th>
-  </thead>
-  <tbody>
-    <%= for (application) in applications { %>
-      <tr>
-        <td><%= application.Name %></td>
-        <td>
-          <div class="float-end">
-            <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-info", body: "View"}) %>
-            <%= linkTo(editApplicationPath({ application_id: application.ID }), {class: "btn btn-warning", body: "Edit"}) %>
-            <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
-          </div>
-        </td>
-      </tr>
-    <% } %>
-  </tbody>
-</table>
-
-<div class="text-center">
-  <%= paginator(pagination) %>
-</div>

@@ -2,9 +2,11 @@ package actions
 
 import (
 	"fmt"
-	"net/http"
-
+	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
+	"log"
+	"net/http"
+	"os"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
@@ -33,6 +35,8 @@ type ApplicationsResource struct {
 // List gets all Applications. This function is mapped to the path
 // GET /applications
 func (v ApplicationsResource) List(c buffalo.Context) error {
+	c.Logger().Error("apps:list")
+
 	user := c.Value("current_user").(*models.User)
 
 	// Get the DB connection from the context
@@ -68,6 +72,7 @@ func (v ApplicationsResource) List(c buffalo.Context) error {
 // Show gets the data for one Application. This function is mapped to
 // the path GET /applications/{application_id}
 func (v ApplicationsResource) Show(c buffalo.Context) error {
+	log.Println("apps:show")
 	application := c.Value("application")
 
 	return responder.Wants("html", func(c buffalo.Context) error {
@@ -82,6 +87,7 @@ func (v ApplicationsResource) Show(c buffalo.Context) error {
 // New renders the form for creating a new Application.
 // This function is mapped to the path GET /applications/new
 func (v ApplicationsResource) New(c buffalo.Context) error {
+	log.Println("apps:new")
 	c.Set("application", &models.Application{})
 
 	return c.Render(http.StatusOK, r.HTML("applications/new.plush.html"))
@@ -90,6 +96,7 @@ func (v ApplicationsResource) New(c buffalo.Context) error {
 // Create adds a Application to the DB. This function is mapped to the
 // path POST /applications
 func (v ApplicationsResource) Create(c buffalo.Context) error {
+	log.Println("apps:create")
 	user := c.Value("current_user").(*models.User)
 
 	// Allocate an empty Application
@@ -150,6 +157,7 @@ func (v ApplicationsResource) Create(c buffalo.Context) error {
 // Edit renders a edit form for a Application. This function is
 // mapped to the path GET /applications/{application_id}/edit
 func (v ApplicationsResource) Edit(c buffalo.Context) error {
+	log.Println("apps:edit")
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -170,6 +178,7 @@ func (v ApplicationsResource) Edit(c buffalo.Context) error {
 // Update changes a Application in the DB. This function is mapped to
 // the path PUT /applications/{application_id}
 func (v ApplicationsResource) Update(c buffalo.Context) error {
+	log.Println("apps:update")
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -226,6 +235,7 @@ func (v ApplicationsResource) Update(c buffalo.Context) error {
 // Destroy deletes a Application from the DB. This function is mapped
 // to the path DELETE /applications/{application_id}
 func (v ApplicationsResource) Destroy(c buffalo.Context) error {
+	log.Println("apps:destroy")
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -257,12 +267,29 @@ func (v ApplicationsResource) Destroy(c buffalo.Context) error {
 	}).Respond(c)
 }
 
-func applicationNotFoundResponse(c buffalo.Context) error {
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Flash().Add("error", T.Translate(c, "application.find.error"))
+func SetCurrentApplication(next buffalo.Handler) buffalo.Handler {
+	os.Exit(1)
+	return func(c buffalo.Context) error {
+		log.Println("Setting current application")
+		uid := c.Session().Get("current_user_id").(uuid.UUID)
 
-		return c.Redirect(302, "/applications")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Error(http.StatusNotFound, errors.New("Application not found"))
-	}).Respond(c)
+		tx := c.Value("tx").(*pop.Connection)
+		application := models.Application{}
+
+		// To find the Application the parameter application_id is used.
+		if err := tx.Where("user_id = ?", uid.String()).Where("idx = ?", c.Param("application_id")).First(&application); err != nil {
+			log.Println(err)
+			return responder.Wants("html", func(c buffalo.Context) error {
+				c.Flash().Add("error", err.Error())
+
+				return c.Redirect(302, "/applications")
+			}).Wants("json", func(c buffalo.Context) error {
+				return c.Error(http.StatusNotFound, errors.New("Application not found"))
+			}).Respond(c)
+		}
+
+		c.Set("application", application)
+
+		return next(c)
+	}
 }

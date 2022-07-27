@@ -88,7 +88,7 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="auth-login-basic.html">
+                        <a class="dropdown-item" id="logout-button" href="#">
                             <i class="bx bx-power-off me-2"></i>
                             <span class="align-middle">Log Out</span>
                         </a>
@@ -99,3 +99,17 @@
         </ul>
     </div>
 </nav>
+
+<script type="application/javascript">
+    $( document ).ready(function() {
+        $( "#logout-button" ).click(function() {
+            $.ajax({
+                type: "DELETE",
+                url: "/auth",
+                success: function(data) {
+                    window.location.replace("/auth/new");
+                }
+            });
+        });
+    });
+</script>

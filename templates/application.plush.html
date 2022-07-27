@@ -9,6 +9,7 @@
     <meta name="csrf-token" content="<%= authenticity_token %>" />
     <link rel="icon" href="<%= assetPath("images/favicon.ico") %>">
     <%= javascriptTag("helpers.js") %>
+    <%= javascriptTag("application.js") %>
 
   </head>
   <body>
@@ -22,6 +23,7 @@
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y">
               <%= partial("flash.html") %>
+              <%= partial("errors.html") %>
               <%= yield %>
             </div>
           </div>
@@ -31,11 +33,11 @@
     <% } else { %>
     <div class="container-xxl">
       <%= partial("flash.html") %>
+      <%= partial("errors.html") %>
       <%= yield %>
     </div>
     <% } %>
 
-    <%= javascriptTag("application.js") %>
     <%= javascriptTag("menu.js") %>
     <%= javascriptTag("main.js") %>
     <%= javascriptTag("dashboard-analytics.js") %>

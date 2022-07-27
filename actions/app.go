@@ -104,12 +104,13 @@ func App() *buffalo.App {
 		users.Middleware.Remove(mw.Authorize)
 
 		apps := ApplicationsResource{}
-		wr := app.Resource("/applications", apps)
-		wr.Resource("projects", ProjectsResource{}).Middleware.Use(mw.SetCurrentApplication)
-		wr.Resource("revisions", RevisionsResource{}).Middleware.Use(mw.SetCurrentApplication)
 
-		wr.Middleware.Use(mw.SetCurrentApplication)
-		wr.Middleware.Skip(mw.SetCurrentApplication, apps.List, apps.Create)
+		wr := app.Resource("/applications", apps)
+		wr.Resource("projects", ProjectsResource{}).Middleware.Use(SetCurrentApplication)
+		wr.Resource("revisions", RevisionsResource{}).Middleware.Use(SetCurrentApplication)
+		//
+		wr.Middleware.Use(SetCurrentApplication)
+		wr.Middleware.Skip(SetCurrentApplication, apps.List, apps.Create, apps.New)
 
 		cr := app.Resource("/clusters", ClustersResource{})
 		cr.Resource("/agents", AgentsResource{})
@@ -140,6 +141,7 @@ func App() *buffalo.App {
 		app.Use(mw.Authorize)
 
 		app.GET("/settings", SettingsIndex)
+
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 
