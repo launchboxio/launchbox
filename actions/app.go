@@ -142,6 +142,7 @@ func App() *buffalo.App {
 
 		app.GET("/settings", SettingsIndex)
 
+		app.Resource("/secrets", SecretsResource{})
 		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
 	}
 

@@ -1,27 +1,56 @@
-<div class="py-4 mb-2">
-  <h3 class="d-inline-block">Application Details</h3>
+<h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Applications /</span> <%= application.Name %></h4>
 
-  <div class="float-end">
-    <%= linkTo(applicationsPath(), {class: "btn btn-info"}) { %>
-      Back to all Applications
-    <% } %>
-    <%= linkTo(editApplicationPath({ application_id: application.ID }), {class: "btn btn-warning", body: "Edit"}) %>
-    <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>
+<!--<div class="py-4 mb-2">-->
+<!--  <h3 class="d-inline-block">Application Details</h3>-->
+
+<!--  <div class="float-end">-->
+<!--    <%= linkTo(applicationsPath(), {class: "btn btn-info"}) { %>-->
+<!--      Back to all Applications-->
+<!--    <% } %>-->
+<!--    <%= linkTo(editApplicationPath({ application_id: application.ID }), {class: "btn btn-warning", body: "Edit"}) %>-->
+<!--    <%= linkTo(applicationPath({ application_id: application.ID }), {class: "btn btn-danger", "data-method": "DELETE", "data-confirm": "Are you sure?", body: "Destroy"}) %>-->
+<!--  </div>-->
+<!--</div>-->
+
+<div class="row">
+  <div class="col-12 col-lg-8 order-2 order-md-3 order-lg-2 mb-4">
+    <div class="card">
+      <h5 class="card-header">Projects</h5>
+      <div class="card-body">
+        <%= if (len(application.Projects) == 0) { %>
+        <div class="alert alert-warning">
+          No projects for this application yet. Create one now!
+        </div>
+        <% } else { %>
+
+        <% } %>
+        <ul class="p-0 m-0">
+          <%= for (project) in application.Projects { %>
+          <li class="d-flex mb-4 pb-1">
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <%= project.Name %>
+            </div>
+          </li>
+          <% } %>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a href="<%= pathFor(newApplicationProjectsPath({application_id: application.ID})) %>">Create a project</a>
+      </div>
+    </div>
   </div>
 </div>
+<!--<%= if (len(application.Projects) == 0) { %>-->
+<!--<div class="alert alert-warning">-->
+<!--  No projects for this application yet. Create one now!-->
+<!--</div>-->
+<!--<% } %>-->
+<!--<ul class="list-group mb-2 ">-->
+<!--  <%= for (project) in application.Projects { %>-->
+<!--  <li><%= project.Name %></li>-->
+<!--  <% } %>-->
+<!--</ul>-->
 
-
-<%= if (len(application.Projects) == 0) { %>
-<div class="alert alert-warning">
-  No projects for this application yet. Create one now!
-</div>
-<% } %>
-<ul class="list-group mb-2 ">
-  <%= for (project) in application.Projects { %>
-  <li><%= project.Name %></li>
-  <% } %>
-</ul>
-
-<%= linkTo([application, "projects/new"], {class: "btn"}) { %>
-Create project
-<% } %>
+<!--<%= linkTo([application, "projects/new"], {class: "btn"}) { %>-->
+<!--Create project-->
+<!--<% } %>-->

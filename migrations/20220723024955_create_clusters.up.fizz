@@ -5,7 +5,7 @@ create_table("clusters") {
 	t.Column("provider", "string", {"null": true, "default": "null"})
 	t.Column("region", "string", {"null": true, "default": "null"})
 	t.Column("version", "string", {"null": true, "default": "null"})
-
+    t.Column("tags", "string", {"default": ""})
     t.Column("owner_id", "uuid", {"null": true, "default": "00000000-0000-0000-0000-000000000000"})
     t.Column("owner_type", "string", {"default": "user"})
     t.Column("last_check_in", "timestamp", {"null": true})

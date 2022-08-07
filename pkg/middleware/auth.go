@@ -1,10 +1,11 @@
 package middleware
 
 import (
+	"launchbox/models"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/pkg/errors"
-	"launchbox/models"
 )
 
 func SetCurrentUser(next buffalo.Handler) buffalo.Handler {

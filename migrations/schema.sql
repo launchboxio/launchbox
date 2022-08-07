@@ -63,6 +63,7 @@ CREATE TABLE public.applications (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
     namespace character varying(255) NOT NULL,
+    tags character varying(255) DEFAULT ''::character varying NOT NULL,
     user_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -97,6 +98,7 @@ CREATE TABLE public.clusters (
     provider character varying(255) DEFAULT 'null'::character varying,
     region character varying(255) DEFAULT 'null'::character varying,
     version character varying(255) DEFAULT 'null'::character varying,
+    tags character varying(255) DEFAULT ''::character varying NOT NULL,
     owner_id uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
     owner_type character varying(255) DEFAULT 'user'::character varying NOT NULL,
     last_check_in timestamp without time zone,
@@ -152,6 +154,24 @@ CREATE TABLE public.schema_migration (
 ALTER TABLE public.schema_migration OWNER TO launchbox;
 
 --
+-- Name: secrets; Type: TABLE; Schema: public; Owner: launchbox
+--
+
+CREATE TABLE public.secrets (
+    id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    sensitive boolean DEFAULT true NOT NULL,
+    owner_type character varying(255),
+    owner_id uuid,
+    cluster_id uuid,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.secrets OWNER TO launchbox;
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: launchbox
 --
 
@@ -184,6 +204,7 @@ CREATE TABLE public.vcs_connections (
     access_token character varying(255) DEFAULT 'null'::character varying,
     expires_at timestamp without time zone,
     refresh_token character varying(255) DEFAULT 'null'::character varying,
+    vcs_connection_id uuid NOT NULL,
     user_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -246,6 +267,14 @@ ALTER TABLE ONLY public.projects
 
 ALTER TABLE ONLY public.revisions
     ADD CONSTRAINT revisions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: secrets secrets_pkey; Type: CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.secrets
+    ADD CONSTRAINT secrets_pkey PRIMARY KEY (id);
 
 
 --
@@ -358,6 +387,14 @@ ALTER TABLE ONLY public.revisions
 
 ALTER TABLE ONLY public.vcs_connections
     ADD CONSTRAINT vcs_connections_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: vcs_connections vcs_connections_vcs_connection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: launchbox
+--
+
+ALTER TABLE ONLY public.vcs_connections
+    ADD CONSTRAINT vcs_connections_vcs_connection_id_fkey FOREIGN KEY (vcs_connection_id) REFERENCES public.vcs_connections(id);
 
 
 --

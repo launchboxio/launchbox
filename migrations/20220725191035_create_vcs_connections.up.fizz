@@ -11,6 +11,9 @@ create_table("vcs_connections") {
 	t.Column("expires_at", "timestamp", {"null": true})
 	t.Column("refresh_token", "string", {"null": true, "default": "null"})
 
+    t.Column("vcs_connection_id", "uuid", {})
+    t.ForeignKey("vcs_connection_id", {"vcs_connections": ["id"]}, {})
+
     t.Column("user_id", "uuid")
     t.ForeignKey("user_id", {"users": ["id"]}, {})
 

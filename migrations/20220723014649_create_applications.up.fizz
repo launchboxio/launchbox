@@ -3,6 +3,8 @@ create_table("applications") {
     t.Column("name", "string")
     t.Column("namespace", "string")
 
+    t.Column("tags", "string", {"default": ""})
+
     t.Column("user_id", "uuid")
 	t.ForeignKey("user_id", {"users": ["id"]}, {})
 
