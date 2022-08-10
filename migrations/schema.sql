@@ -117,6 +117,7 @@ ALTER TABLE public.clusters OWNER TO launchbox;
 CREATE TABLE public.projects (
     id uuid NOT NULL,
     name character varying(255) NOT NULL,
+    slug character varying(255) NOT NULL,
     status character varying(255),
     application_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,

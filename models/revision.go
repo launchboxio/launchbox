@@ -12,10 +12,10 @@ import (
 // Revision is used by pop to map your revisions database table to your go code.
 type Revision struct {
 	ID        uuid.UUID `json:"id" db:"id"`
-	Status    string    `json:"status"`
-	CommitSha string    `json:"commit_sha"`
+	Status    string    `json:"status" db:"status"`
+	CommitSha string    `json:"commit_sha" db:"commit_sha"`
 
-	ProjectID uuid.UUID `json:"project_id"`
+	ProjectID uuid.UUID `json:"project_id" db:"project_id"`
 	Project   Project   `json:"project,omitempty" belongs_to:"project"`
 
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
